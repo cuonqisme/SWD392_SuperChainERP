@@ -12,7 +12,7 @@ public class CategoryService : ICategoryService
         _dataStore = dataStore;
     }
 
-    public IReadOnlyList<Category> GetAll(string? statusFilter = null)
+    public CategoryIndexViewModel BuildIndex(string? statusFilter = null)
     {
         var query = _dataStore.Categories.AsEnumerable();
 
@@ -21,10 +21,53 @@ public class CategoryService : ICategoryService
             query = query.Where(category => category.Status == status);
         }
 
-        return query.OrderBy(category => category.CategoryName).ToList();
+        return new CategoryIndexViewModel
+        {
+            StatusFilter = statusFilter,
+            Categories = query.OrderBy(category => category.CategoryName).ToList(),
+            ProductCountByCategory = _dataStore.Products
+                .GroupBy(product => product.CategoryId)
+                .ToDictionary(group => group.Key, group => group.Count())
+        };
     }
 
-    public Category? GetById(string id) =>
+    public CategoryDetailsViewModel? BuildDetails(string id)
+    {
+        var category = GetById(id);
+        if (category is null)
+        {
+            return null;
+        }
+
+        return new CategoryDetailsViewModel
+        {
+            Category = category,
+            Products = _dataStore.Products
+                .Where(product => product.CategoryId == category.CategoryId)
+                .OrderBy(product => product.ProductName)
+                .ToList()
+        };
+    }
+
+    public CategoryFormViewModel BuildCreateForm() => new();
+
+    public CategoryFormViewModel? BuildEditForm(string id)
+    {
+        var category = GetById(id);
+        if (category is null)
+        {
+            return null;
+        }
+
+        return new CategoryFormViewModel
+        {
+            CategoryName = category.CategoryName,
+            Description = category.Description,
+            SkuPrefix = category.SkuPrefix
+        };
+    }
+
+    private Category? GetById(string id) =>
         _dataStore.Categories.FirstOrDefault(category => category.CategoryId.Equals(id, StringComparison.OrdinalIgnoreCase));
 
     public ServiceResult Create(CategoryFormViewModel model)
@@ -78,7 +121,7 @@ public class CategoryService : ICategoryService
         return ServiceResult.Success($"Category {category.CategoryName} was updated successfully.");
     }
 
-    public ServiceResult ChangeStatus(string id, RecordStatus status)
+    public ServiceResult Deactivate(string id)
     {
         var category = GetById(id);
         if (category is null)
@@ -86,15 +129,14 @@ public class CategoryService : ICategoryService
             return ServiceResult.Failure("The selected category could not be found.");
         }
 
-        if (status == RecordStatus.Inactive &&
-            _dataStore.Products.Any(product => product.CategoryId == category.CategoryId && product.Status == RecordStatus.Active))
+        if (_dataStore.Products.Any(product => product.CategoryId == category.CategoryId && product.Status == RecordStatus.Active))
         {
             return ServiceResult.Failure("Deactivate or move active products before deactivating this category.");
         }
 
-        category.Status = status;
+        category.Status = RecordStatus.Inactive;
         category.UpdatedDate = DateTime.UtcNow;
-        return ServiceResult.Success($"Category {category.CategoryName} status changed to {status}.");
+        return ServiceResult.Success($"Category {category.CategoryName} was deactivated successfully.");
     }
 
     public static string BuildSku(string prefix, string productId) => $"{prefix}-{productId}";

@@ -5,9 +5,13 @@ namespace SupperChainErpDemo.Web.Services;
 
 public interface IUserService
 {
-    IReadOnlyList<UserAccount> GetAll(string? keyword = null, string? statusFilter = null);
+    UserIndexViewModel BuildIndex(string? keyword = null, string? statusFilter = null);
 
-    UserAccount? GetById(string id);
+    UserDetailsViewModel? BuildDetails(string id);
+
+    UserFormViewModel BuildCreateForm();
+
+    UserFormViewModel? BuildEditForm(string id);
 
     ServiceResult Create(UserFormViewModel model);
 

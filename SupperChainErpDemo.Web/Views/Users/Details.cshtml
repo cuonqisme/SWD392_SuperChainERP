@@ -1,4 +1,4 @@
-@model SupperChainErpDemo.Web.Models.UserAccount
+@model SupperChainErpDemo.Web.ViewModels.Users.UserDetailsViewModel
 @{
     ViewData["Title"] = "View User";
 }
@@ -6,11 +6,11 @@
 <section class="page-intro">
     <div>
         <p class="eyebrow">UC-02</p>
-        <h2>@Model.FullName</h2>
+        <h2>@Model.User.FullName</h2>
         <p>Xem thông tin user, role đang gán và trạng thái tài khoản.</p>
     </div>
     <div class="action-stack">
-        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.UserId">Edit</a>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.User.UserId">Edit</a>
         <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
     </div>
 </section>
@@ -20,13 +20,13 @@
         <h3>Account information</h3>
         <dl class="detail-grid">
             <dt>User ID</dt>
-            <dd>@Model.UserId</dd>
+            <dd>@Model.User.UserId</dd>
             <dt>Username</dt>
-            <dd>@Model.Username</dd>
+            <dd>@Model.User.Username</dd>
             <dt>Role</dt>
-            <dd>@ViewBag.RoleName</dd>
+            <dd>@Model.RoleName</dd>
             <dt>Status</dt>
-            <dd><span class="status-pill @(Model.Status == RecordStatus.Active ? "active" : "inactive")">@Model.Status</span></dd>
+            <dd><span class="status-pill @(Model.User.Status == RecordStatus.Active ? "active" : "inactive")">@Model.User.Status</span></dd>
         </dl>
     </article>
 
@@ -34,15 +34,15 @@
         <h3>Contact and lifecycle</h3>
         <dl class="detail-grid">
             <dt>Full name</dt>
-            <dd>@Model.FullName</dd>
+            <dd>@Model.User.FullName</dd>
             <dt>Email</dt>
-            <dd>@Model.Email</dd>
+            <dd>@Model.User.Email</dd>
             <dt>Phone</dt>
-            <dd>@Model.Phone</dd>
+            <dd>@Model.User.Phone</dd>
             <dt>Created</dt>
-            <dd>@Model.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            <dd>@Model.User.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
             <dt>Updated</dt>
-            <dd>@Model.UpdatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            <dd>@Model.User.UpdatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
         </dl>
     </article>
 </section>

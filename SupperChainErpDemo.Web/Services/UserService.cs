@@ -1,5 +1,6 @@
 using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.ViewModels.Users;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SupperChainErpDemo.Web.Services;
 
@@ -12,7 +13,7 @@ public class UserService : IUserService
         _dataStore = dataStore;
     }
 
-    public IReadOnlyList<UserAccount> GetAll(string? keyword = null, string? statusFilter = null)
+    public UserIndexViewModel BuildIndex(string? keyword = null, string? statusFilter = null)
     {
         var query = _dataStore.Users.AsEnumerable();
 
@@ -29,17 +30,59 @@ public class UserService : IUserService
             query = query.Where(user => user.Status == status);
         }
 
-        return query
-            .OrderByDescending(user => user.UpdatedDate)
-            .ThenBy(user => user.FullName)
-            .ToList();
+        return new UserIndexViewModel
+        {
+            Keyword = keyword,
+            StatusFilter = statusFilter,
+            Users = query
+                .OrderByDescending(user => user.UpdatedDate)
+                .ThenBy(user => user.FullName)
+                .ToList(),
+            RoleNames = _dataStore.Roles.ToDictionary(role => role.RoleId, role => role.RoleName)
+        };
     }
 
-    public UserAccount? GetById(string id) =>
+    public UserDetailsViewModel? BuildDetails(string id)
+    {
+        var user = GetById(id);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new UserDetailsViewModel
+        {
+            User = user,
+            RoleName = _dataStore.Roles.FirstOrDefault(role => role.RoleId == user.RoleId)?.RoleName ?? "Unknown"
+        };
+    }
+
+    public UserFormViewModel BuildCreateForm() => PopulateRoleOptions(new UserFormViewModel());
+
+    public UserFormViewModel? BuildEditForm(string id)
+    {
+        var user = GetById(id);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return PopulateRoleOptions(new UserFormViewModel
+        {
+            RoleId = user.RoleId,
+            Username = user.Username,
+            FullName = user.FullName,
+            Email = user.Email,
+            Phone = user.Phone
+        });
+    }
+
+    private UserAccount? GetById(string id) =>
         _dataStore.Users.FirstOrDefault(user => user.UserId.Equals(id, StringComparison.OrdinalIgnoreCase));
 
     public ServiceResult Create(UserFormViewModel model)
     {
+        PopulateRoleOptions(model);
         var validationError = Validate(model);
         if (validationError is not null)
         {
@@ -66,6 +109,7 @@ public class UserService : IUserService
 
     public ServiceResult Update(string id, UserFormViewModel model)
     {
+        PopulateRoleOptions(model);
         var user = GetById(id);
         if (user is null)
         {
@@ -154,5 +198,15 @@ public class UserService : IUserService
             user.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 
         return duplicateEmail ? "Email already exists." : null;
+    }
+
+    private UserFormViewModel PopulateRoleOptions(UserFormViewModel model)
+    {
+        model.RoleOptions = _dataStore.Roles
+            .Where(role => role.Status == RecordStatus.Active || role.RoleId == model.RoleId)
+            .OrderBy(role => role.RoleName)
+            .Select(role => new SelectListItem(role.RoleName, role.RoleId))
+            .ToList();
+        return model;
     }
 }

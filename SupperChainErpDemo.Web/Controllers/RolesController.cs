@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.Services;
 using SupperChainErpDemo.Web.ViewModels.Roles;
 
@@ -18,11 +17,7 @@ public class RolesController : Controller
 
     public IActionResult Index(string? statusFilter)
     {
-        return View(new RoleIndexViewModel
-        {
-            StatusFilter = statusFilter,
-            Roles = _roleService.GetAll(statusFilter)
-        });
+        return View(_roleService.BuildIndex(statusFilter));
     }
 
     public IActionResult Details(string id)
@@ -37,21 +32,22 @@ public class RolesController : Controller
         return View(role);
     }
 
-    public IActionResult Create() => View(BuildForm());
+    public IActionResult Create() => View(_roleService.BuildCreateForm());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Create(RoleFormViewModel model)
     {
-        model = BuildForm(model);
         if (!ModelState.IsValid)
         {
+            model = MergeForm(_roleService.BuildCreateForm(), model);
             return View(model);
         }
 
         var result = _roleService.Create(model);
         if (!result.Succeeded)
         {
+            model = MergeForm(_roleService.BuildCreateForm(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -62,34 +58,30 @@ public class RolesController : Controller
 
     public IActionResult Edit(string id)
     {
-        var role = _roleService.GetById(id);
-        if (role is null)
+        var viewModel = _roleService.BuildEditForm(id);
+        if (viewModel is null)
         {
             _notificationService.Error("Role not found", "The requested role does not exist anymore.");
             return RedirectToAction(nameof(Index));
         }
 
-        return View(BuildForm(new RoleFormViewModel
-        {
-            RoleName = role.RoleName,
-            Description = role.Description,
-            SelectedPermissions = role.Permissions.ToList()
-        }));
+        return View(viewModel);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Edit(string id, RoleFormViewModel model)
     {
-        model = BuildForm(model);
         if (!ModelState.IsValid)
         {
+            model = MergeForm(_roleService.BuildEditForm(id) ?? _roleService.BuildCreateForm(), model);
             return View(model);
         }
 
         var result = _roleService.Update(id, model);
         if (!result.Succeeded)
         {
+            model = MergeForm(_roleService.BuildEditForm(id) ?? _roleService.BuildCreateForm(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -100,9 +92,9 @@ public class RolesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult ChangeStatus(string id, RecordStatus status)
+    public IActionResult Deactivate(string id)
     {
-        var result = _roleService.ChangeStatus(id, status);
+        var result = _roleService.Deactivate(id);
         if (!result.Succeeded)
         {
             _notificationService.Error("Role status blocked", result.Message);
@@ -113,10 +105,11 @@ public class RolesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private RoleFormViewModel BuildForm(RoleFormViewModel? model = null)
+    private static RoleFormViewModel MergeForm(RoleFormViewModel target, RoleFormViewModel source)
     {
-        model ??= new RoleFormViewModel();
-        model.AvailablePermissions = _roleService.GetPermissionCatalog();
-        return model;
+        target.RoleName = source.RoleName;
+        target.Description = source.Description;
+        target.SelectedPermissions = source.SelectedPermissions;
+        return target;
     }
 }

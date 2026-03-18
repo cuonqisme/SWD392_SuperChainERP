@@ -5,13 +5,17 @@ namespace SupperChainErpDemo.Web.Services;
 
 public interface ICategoryService
 {
-    IReadOnlyList<Category> GetAll(string? statusFilter = null);
+    CategoryIndexViewModel BuildIndex(string? statusFilter = null);
 
-    Category? GetById(string id);
+    CategoryDetailsViewModel? BuildDetails(string id);
+
+    CategoryFormViewModel BuildCreateForm();
+
+    CategoryFormViewModel? BuildEditForm(string id);
 
     ServiceResult Create(CategoryFormViewModel model);
 
     ServiceResult Update(string id, CategoryFormViewModel model);
 
-    ServiceResult ChangeStatus(string id, RecordStatus status);
+    ServiceResult Deactivate(string id);
 }

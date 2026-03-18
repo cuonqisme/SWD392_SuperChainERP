@@ -1,4 +1,4 @@
-@model SupperChainErpDemo.Web.Models.Product
+@model SupperChainErpDemo.Web.ViewModels.Products.ProductDetailsViewModel
 @{
     ViewData["Title"] = "View Product";
 }
@@ -6,11 +6,11 @@
 <section class="page-intro">
     <div>
         <p class="eyebrow">UC-10</p>
-        <h2>@Model.ProductName</h2>
+        <h2>@Model.Product.ProductName</h2>
         <p>Xem thông tin product, category, barcode, pricing và trạng thái.</p>
     </div>
     <div class="action-stack">
-        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.ProductId">Edit</a>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Product.ProductId">Edit</a>
         <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
     </div>
 </section>
@@ -20,15 +20,15 @@
         <h3>Product summary</h3>
         <dl class="detail-grid">
             <dt>Product ID</dt>
-            <dd>@Model.ProductId</dd>
+            <dd>@Model.Product.ProductId</dd>
             <dt>Category</dt>
-            <dd>@ViewBag.CategoryName</dd>
+            <dd>@Model.CategoryName</dd>
             <dt>SKU</dt>
-            <dd>@Model.Sku</dd>
+            <dd>@Model.Product.Sku</dd>
             <dt>Barcode</dt>
-            <dd>@Model.Barcode</dd>
+            <dd>@Model.Product.Barcode</dd>
             <dt>Status</dt>
-            <dd><span class="status-pill @(Model.Status == RecordStatus.Active ? "active" : "inactive")">@Model.Status</span></dd>
+            <dd><span class="status-pill @(Model.Product.Status == RecordStatus.Active ? "active" : "inactive")">@Model.Product.Status</span></dd>
         </dl>
     </article>
 
@@ -36,13 +36,13 @@
         <h3>Commercial data</h3>
         <dl class="detail-grid">
             <dt>Base price</dt>
-            <dd>@Model.BasePrice.ToString("N0") VND</dd>
+            <dd>@Model.Product.BasePrice.ToString("N0") VND</dd>
             <dt>Created</dt>
-            <dd>@Model.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            <dd>@Model.Product.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
             <dt>Updated</dt>
-            <dd>@Model.UpdatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            <dd>@Model.Product.UpdatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
             <dt>Description</dt>
-            <dd>@Model.Description</dd>
+            <dd>@Model.Product.Description</dd>
         </dl>
     </article>
 </section>

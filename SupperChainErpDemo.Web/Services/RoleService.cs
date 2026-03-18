@@ -6,13 +6,15 @@ namespace SupperChainErpDemo.Web.Services;
 public class RoleService : IRoleService
 {
     private readonly DemoDataStore _dataStore;
+    private readonly IPermissionService _permissionService;
 
-    public RoleService(DemoDataStore dataStore)
+    public RoleService(DemoDataStore dataStore, IPermissionService permissionService)
     {
         _dataStore = dataStore;
+        _permissionService = permissionService;
     }
 
-    public IReadOnlyList<Role> GetAll(string? statusFilter = null)
+    public RoleIndexViewModel BuildIndex(string? statusFilter = null)
     {
         var query = _dataStore.Roles.AsEnumerable();
 
@@ -21,13 +23,37 @@ public class RoleService : IRoleService
             query = query.Where(role => role.Status == status);
         }
 
-        return query.OrderBy(role => role.RoleName).ToList();
+        return new RoleIndexViewModel
+        {
+            StatusFilter = statusFilter,
+            Roles = query.OrderBy(role => role.RoleName).ToList()
+        };
     }
 
     public Role? GetById(string id) =>
         _dataStore.Roles.FirstOrDefault(role => role.RoleId.Equals(id, StringComparison.OrdinalIgnoreCase));
 
-    public IReadOnlyList<string> GetPermissionCatalog() => _dataStore.PermissionCatalog;
+    public RoleFormViewModel BuildCreateForm() => new()
+    {
+        AvailablePermissions = _permissionService.GetCatalog()
+    };
+
+    public RoleFormViewModel? BuildEditForm(string id)
+    {
+        var role = GetById(id);
+        if (role is null)
+        {
+            return null;
+        }
+
+        return new RoleFormViewModel
+        {
+            RoleName = role.RoleName,
+            Description = role.Description,
+            SelectedPermissions = role.Permissions.ToList(),
+            AvailablePermissions = _permissionService.GetCatalog()
+        };
+    }
 
     public ServiceResult Create(RoleFormViewModel model)
     {
@@ -73,7 +99,7 @@ public class RoleService : IRoleService
         return ServiceResult.Success($"Role {role.RoleName} was updated successfully.");
     }
 
-    public ServiceResult ChangeStatus(string id, RecordStatus status)
+    public ServiceResult Deactivate(string id)
     {
         var role = GetById(id);
         if (role is null)
@@ -81,15 +107,14 @@ public class RoleService : IRoleService
             return ServiceResult.Failure("The selected role could not be found.");
         }
 
-        if (status == RecordStatus.Inactive &&
-            _dataStore.Users.Any(user => user.RoleId == role.RoleId && user.Status == RecordStatus.Active))
+        if (_dataStore.Users.Any(user => user.RoleId == role.RoleId && user.Status == RecordStatus.Active))
         {
             return ServiceResult.Failure("This role is still assigned to active users. Reassign or deactivate those users first.");
         }
 
-        role.Status = status;
+        role.Status = RecordStatus.Inactive;
         role.UpdatedDate = DateTime.UtcNow;
-        return ServiceResult.Success($"Role {role.RoleName} status changed to {status}.");
+        return ServiceResult.Success($"Role {role.RoleName} was deactivated successfully.");
     }
 
     private string? Validate(RoleFormViewModel model, string? currentId = null)
@@ -100,9 +125,10 @@ public class RoleService : IRoleService
             return "Role name is required.";
         }
 
-        if (model.SelectedPermissions.Count == 0)
+        var permissionValidation = _permissionService.ValidateSelection(model.SelectedPermissions);
+        if (permissionValidation is not null)
         {
-            return "Pick at least one permission so the role can be used in access control.";
+            return permissionValidation;
         }
 
         var nameExists = _dataStore.Roles.Any(role =>
