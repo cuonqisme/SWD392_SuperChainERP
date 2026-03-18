@@ -1,0 +1,28 @@
+@model SupperChainErpDemo.Web.ViewModels.TransferNotes.TransferNoteFormViewModel
+@{
+    ViewData["Title"] = "Create Transfer Note";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-41</p>
+        <h2>Create transfer note</h2>
+        <p>Initialize a transfer draft, validate locations and products, then save the note in Draft status for manager approval.</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index">Back to list</a>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions mt-4">
+            <button class="btn btn-primary" type="submit">Create Transfer Note</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

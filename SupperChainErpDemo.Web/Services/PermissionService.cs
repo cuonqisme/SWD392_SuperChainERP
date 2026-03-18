@@ -1,15 +1,10 @@
+using SupperChainErpDemo.Web.Data;
+
 namespace SupperChainErpDemo.Web.Services;
 
 public class PermissionService : IPermissionService
 {
-    private readonly DemoDataStore _dataStore;
-
-    public PermissionService(DemoDataStore dataStore)
-    {
-        _dataStore = dataStore;
-    }
-
-    public IReadOnlyList<string> GetCatalog() => _dataStore.PermissionCatalog;
+    public IReadOnlyList<string> GetCatalog() => DbSeeder.PermissionCatalog;
 
     public string? ValidateSelection(IReadOnlyCollection<string> selectedPermissions)
     {
@@ -19,7 +14,7 @@ public class PermissionService : IPermissionService
         }
 
         var unknownPermission = selectedPermissions
-            .FirstOrDefault(permission => !_dataStore.PermissionCatalog.Contains(permission, StringComparer.OrdinalIgnoreCase));
+            .FirstOrDefault(permission => !DbSeeder.PermissionCatalog.Contains(permission, StringComparer.OrdinalIgnoreCase));
 
         return unknownPermission is null ? null : $"Permission {unknownPermission} is not part of the system catalog.";
     }

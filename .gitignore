@@ -2,6 +2,10 @@
 **/bin/
 **/obj/
 **/artifacts/
+**/App_Data/*.db
+**/App_Data/*.db-journal
+**/App_Data/*.sqlite
+**/App_Data/*.sqlite-journal
 *.user
 *.suo
 *.log

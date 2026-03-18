@@ -5,17 +5,17 @@ namespace SupperChainErpDemo.Web.Services;
 
 public interface IUserService
 {
-    UserIndexViewModel BuildIndex(string? keyword = null, string? statusFilter = null);
+    UserIndexViewModel GetUserList(string? keyword = null, string? statusFilter = null);
 
-    UserDetailsViewModel? BuildDetails(string id);
+    UserDetailsViewModel? GetUserDetails(string id);
 
-    UserFormViewModel BuildCreateForm();
+    UserFormViewModel PrepareCreateUser();
 
-    UserFormViewModel? BuildEditForm(string id);
+    UserFormViewModel? PrepareUpdateUser(string id);
 
-    ServiceResult Create(UserFormViewModel model);
+    ServiceResult CreateUser(UserFormViewModel model);
 
-    ServiceResult Update(string id, UserFormViewModel model);
+    ServiceResult UpdateUser(string id, UserFormViewModel model);
 
-    ServiceResult ChangeStatus(string id, RecordStatus status);
+    ServiceResult UpdateUserStatus(string id, RecordStatus status);
 }

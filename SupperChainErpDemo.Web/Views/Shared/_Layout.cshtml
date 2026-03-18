@@ -30,12 +30,13 @@
                 <a class="nav-tile @(currentController == "Roles" ? "is-active" : null)" asp-controller="Roles" asp-action="Index">Roles</a>
                 <a class="nav-tile @(currentController == "Categories" ? "is-active" : null)" asp-controller="Categories" asp-action="Index">Categories</a>
                 <a class="nav-tile @(currentController == "Products" ? "is-active" : null)" asp-controller="Products" asp-action="Index">Products</a>
+                <a class="nav-tile @(currentController == "TransferNotes" ? "is-active" : null)" asp-controller="TransferNotes" asp-action="Index">Transfer Notes</a>
             </div>
 
             <div class="sidebar-note">
                 <p>Focused scope</p>
-                <strong>UC-01 to UC-16</strong>
-                <span>Users, Roles, Products, and Categories with create, view, update, and status flows.</span>
+                <strong>UC-01 to UC-16, UC-41 to UC-45</strong>
+                <span>Master data plus internal transfer workflows for create, review, approval, and transfer-out confirmation.</span>
             </div>
         </aside>
 

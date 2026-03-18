@@ -5,17 +5,17 @@ namespace SupperChainErpDemo.Web.Services;
 
 public interface ICategoryService
 {
-    CategoryIndexViewModel BuildIndex(string? statusFilter = null);
+    CategoryIndexViewModel GetCategoryList(string? statusFilter = null);
 
-    CategoryDetailsViewModel? BuildDetails(string id);
+    CategoryDetailsViewModel? GetCategoryDetails(string id);
 
-    CategoryFormViewModel BuildCreateForm();
+    CategoryFormViewModel PrepareCreateCategory();
 
-    CategoryFormViewModel? BuildEditForm(string id);
+    CategoryFormViewModel? PrepareUpdateCategory(string id);
 
-    ServiceResult Create(CategoryFormViewModel model);
+    ServiceResult CreateCategory(CategoryFormViewModel model);
 
-    ServiceResult Update(string id, CategoryFormViewModel model);
+    ServiceResult UpdateCategory(string id, CategoryFormViewModel model);
 
-    ServiceResult Deactivate(string id);
+    ServiceResult DeactivateCategory(string id);
 }

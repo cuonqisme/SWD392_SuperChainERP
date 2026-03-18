@@ -12,23 +12,23 @@ public class CategoryManagementCoordinator : ICategoryManagementCoordinator
     }
 
     public CategoryIndexViewModel ShowCategoryList(string? statusFilter = null) =>
-        _categoryService.BuildIndex(statusFilter);
+        _categoryService.GetCategoryList(statusFilter);
 
     public CategoryDetailsViewModel? ShowCategoryDetails(string id) =>
-        _categoryService.BuildDetails(id);
+        _categoryService.GetCategoryDetails(id);
 
     public CategoryFormViewModel PrepareCreateCategory() =>
-        _categoryService.BuildCreateForm();
+        _categoryService.PrepareCreateCategory();
 
     public CategoryFormViewModel? PrepareUpdateCategory(string id) =>
-        _categoryService.BuildEditForm(id);
+        _categoryService.PrepareUpdateCategory(id);
 
     public ServiceResult CreateCategory(CategoryFormViewModel model) =>
-        _categoryService.Create(model);
+        _categoryService.CreateCategory(model);
 
     public ServiceResult UpdateCategory(string id, CategoryFormViewModel model) =>
-        _categoryService.Update(id, model);
+        _categoryService.UpdateCategory(id, model);
 
     public ServiceResult DeactivateCategory(string id) =>
-        _categoryService.Deactivate(id);
+        _categoryService.DeactivateCategory(id);
 }

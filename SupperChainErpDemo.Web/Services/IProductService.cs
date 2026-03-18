@@ -1,21 +1,26 @@
 using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.ViewModels.Products;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SupperChainErpDemo.Web.Services;
 
 public interface IProductService
 {
-    ProductIndexViewModel BuildIndex(string? statusFilter = null, string? categoryId = null);
+    ProductIndexViewModel GetProductList(string? statusFilter = null, string? categoryId = null);
 
-    ProductDetailsViewModel? BuildDetails(string id);
+    ProductDetailsViewModel? GetProductDetails(string id);
 
-    ProductFormViewModel BuildCreateForm();
+    ProductFormViewModel PrepareCreateProduct();
 
-    ProductFormViewModel? BuildEditForm(string id);
+    ProductFormViewModel? PrepareUpdateProduct(string id);
 
-    ServiceResult Create(ProductFormViewModel model);
+    IReadOnlyList<SelectListItem> GetProductOptions(IEnumerable<string>? includeProductIds = null);
 
-    ServiceResult Update(string id, ProductFormViewModel model);
+    IReadOnlyDictionary<string, Product> GetProductCatalog(IEnumerable<string> productIds);
 
-    ServiceResult Deactivate(string id);
+    ServiceResult CreateProduct(ProductFormViewModel model);
+
+    ServiceResult UpdateProduct(string id, ProductFormViewModel model);
+
+    ServiceResult DeactivateProduct(string id);
 }

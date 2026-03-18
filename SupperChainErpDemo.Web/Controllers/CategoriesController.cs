@@ -7,16 +7,13 @@ namespace SupperChainErpDemo.Web.Controllers;
 public class CategoriesController : Controller
 {
     private readonly ICategoryManagementCoordinator _categoryManagementCoordinator;
-    private readonly ICategoryService _categoryService;
     private readonly INotificationService _notificationService;
 
     public CategoriesController(
         ICategoryManagementCoordinator categoryManagementCoordinator,
-        ICategoryService categoryService,
         INotificationService notificationService)
     {
         _categoryManagementCoordinator = categoryManagementCoordinator;
-        _categoryService = categoryService;
         _notificationService = notificationService;
     }
 

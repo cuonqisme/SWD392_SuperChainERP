@@ -1,0 +1,157 @@
+@model SupperChainErpDemo.Web.ViewModels.TransferNotes.TransferNoteDetailsViewModel
+@using SupperChainErpDemo.Web.Models
+@{
+    ViewData["Title"] = "Transfer Note Details";
+
+    string statusClass(TransferNoteStatus status) => status switch
+    {
+        TransferNoteStatus.Draft => "app-chip",
+        TransferNoteStatus.Approved => "status-pill active",
+        TransferNoteStatus.TransferOutConfirmed => "status-pill active",
+        TransferNoteStatus.Rejected => "status-pill inactive",
+        _ => "app-chip"
+    };
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-42</p>
+        <h2>@Model.TransferNo</h2>
+        <p>Inspect the transfer route, approval milestone, and requested products before the next workflow action.</p>
+    </div>
+    <div class="form-actions">
+        @if (Model.CanEdit)
+        {
+            <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.TransferNoteId">Update Draft</a>
+        }
+        <a class="btn btn-outline-secondary" asp-action="Index">Back to list</a>
+    </div>
+</section>
+
+<section class="content-panel">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Transfer summary</p>
+            <h3>Status and route</h3>
+        </div>
+        <span class="@statusClass(Model.Status)">@Model.StatusLabel</span>
+    </div>
+
+    <dl class="detail-grid mt-4">
+        <dt>Source</dt>
+        <dd>@Model.SourceLocationName</dd>
+        <dt>Destination</dt>
+        <dd>@Model.DestinationLocationName</dd>
+        <dt>Created by</dt>
+        <dd>@Model.CreatedByName</dd>
+        <dt>Created date</dt>
+        <dd>@Model.CreatedDate.ToString("dd MMM yyyy HH:mm")</dd>
+        <dt>Approved by</dt>
+        <dd>@Model.ApprovedByName</dd>
+        <dt>Approved date</dt>
+        <dd>@(Model.ApprovedDate?.ToString("dd MMM yyyy HH:mm") ?? "-")</dd>
+        <dt>Transfer-out</dt>
+        <dd>@(Model.TransferOutDate?.ToString("dd MMM yyyy HH:mm") ?? "-")</dd>
+        <dt>Transfer-in</dt>
+        <dd>@(Model.TransferInDate?.ToString("dd MMM yyyy HH:mm") ?? "-")</dd>
+        <dt>Note</dt>
+        <dd>@(string.IsNullOrWhiteSpace(Model.Note) ? "-" : Model.Note)</dd>
+    </dl>
+</section>
+
+<section class="content-panel">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Transfer items</p>
+            <h3>Requested products</h3>
+        </div>
+        <span class="app-chip">@Model.Items.Count line(s)</span>
+    </div>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-app align-middle">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Requested quantity</th>
+                    <th>Source availability</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <strong>@item.ProductName</strong>
+                            <div class="cell-muted">@item.ProductId</div>
+                        </td>
+                        <td>@item.Sku</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.SourceAvailableQuantity</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-actions mt-4">
+        @if (Model.CanApprove)
+        {
+            <form method="post" asp-action="Approve">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.TransferNoteId" />
+                <button class="btn btn-success" type="submit">Approve Transfer Note</button>
+            </form>
+        }
+        @if (Model.CanReject)
+        {
+            <form method="post" asp-action="Reject">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.TransferNoteId" />
+                <input class="form-control" type="text" name="reason" placeholder="Optional rejection reason" />
+                <button class="btn btn-outline-danger" type="submit">Reject Transfer Note</button>
+            </form>
+        }
+        @if (Model.CanConfirmTransferOut)
+        {
+            <form method="post" asp-action="ConfirmTransferOut">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.TransferNoteId" />
+                <button class="btn btn-primary" type="submit">Confirm Transfer Out</button>
+            </form>
+        }
+    </div>
+</section>
+
+<section class="content-panel">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">UC-42 timeline</p>
+            <h3>Workflow milestones</h3>
+        </div>
+        <span class="app-chip">@Model.Timeline.Count event(s)</span>
+    </div>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-app align-middle">
+            <thead>
+                <tr>
+                    <th>Milestone</th>
+                    <th>Description</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var milestone in Model.Timeline)
+                {
+                    <tr>
+                        <td><strong>@milestone.Title</strong></td>
+                        <td>@milestone.Description</td>
+                        <td>@(milestone.EventDate?.ToString("dd MMM yyyy HH:mm") ?? "Pending")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

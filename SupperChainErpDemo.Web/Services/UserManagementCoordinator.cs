@@ -13,23 +13,23 @@ public class UserManagementCoordinator : IUserManagementCoordinator
     }
 
     public UserIndexViewModel ShowUserList(string? keyword = null, string? statusFilter = null) =>
-        _userService.BuildIndex(keyword, statusFilter);
+        _userService.GetUserList(keyword, statusFilter);
 
     public UserDetailsViewModel? ShowUserDetails(string id) =>
-        _userService.BuildDetails(id);
+        _userService.GetUserDetails(id);
 
     public UserFormViewModel PrepareCreateUser() =>
-        _userService.BuildCreateForm();
+        _userService.PrepareCreateUser();
 
     public UserFormViewModel? PrepareUpdateUser(string id) =>
-        _userService.BuildEditForm(id);
+        _userService.PrepareUpdateUser(id);
 
     public ServiceResult CreateUser(UserFormViewModel model) =>
-        _userService.Create(model);
+        _userService.CreateUser(model);
 
     public ServiceResult UpdateUser(string id, UserFormViewModel model) =>
-        _userService.Update(id, model);
+        _userService.UpdateUser(id, model);
 
     public ServiceResult UpdateUserStatus(string id, RecordStatus status) =>
-        _userService.ChangeStatus(id, status);
+        _userService.UpdateUserStatus(id, status);
 }

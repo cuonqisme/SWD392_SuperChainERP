@@ -12,23 +12,23 @@ public class ProductManagementCoordinator : IProductManagementCoordinator
     }
 
     public ProductIndexViewModel ShowProductList(string? statusFilter = null, string? categoryId = null) =>
-        _productService.BuildIndex(statusFilter, categoryId);
+        _productService.GetProductList(statusFilter, categoryId);
 
     public ProductDetailsViewModel? ShowProductDetails(string id) =>
-        _productService.BuildDetails(id);
+        _productService.GetProductDetails(id);
 
     public ProductFormViewModel PrepareCreateProduct() =>
-        _productService.BuildCreateForm();
+        _productService.PrepareCreateProduct();
 
     public ProductFormViewModel? PrepareUpdateProduct(string id) =>
-        _productService.BuildEditForm(id);
+        _productService.PrepareUpdateProduct(id);
 
     public ServiceResult CreateProduct(ProductFormViewModel model) =>
-        _productService.Create(model);
+        _productService.CreateProduct(model);
 
     public ServiceResult UpdateProduct(string id, ProductFormViewModel model) =>
-        _productService.Update(id, model);
+        _productService.UpdateProduct(id, model);
 
     public ServiceResult DeactivateProduct(string id) =>
-        _productService.Deactivate(id);
+        _productService.DeactivateProduct(id);
 }

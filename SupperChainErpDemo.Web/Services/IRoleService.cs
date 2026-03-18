@@ -5,17 +5,17 @@ namespace SupperChainErpDemo.Web.Services;
 
 public interface IRoleService
 {
-    RoleIndexViewModel BuildIndex(string? statusFilter = null);
+    RoleIndexViewModel GetRoleList(string? statusFilter = null);
 
-    Role? GetById(string id);
+    Role? GetRoleDetails(string id);
 
-    RoleFormViewModel BuildCreateForm();
+    RoleFormViewModel PrepareCreateRole();
 
-    RoleFormViewModel? BuildEditForm(string id);
+    RoleFormViewModel? PrepareUpdateRole(string id);
 
-    ServiceResult Create(RoleFormViewModel model);
+    ServiceResult CreateRole(RoleFormViewModel model);
 
-    ServiceResult Update(string id, RoleFormViewModel model);
+    ServiceResult UpdateRole(string id, RoleFormViewModel model);
 
-    ServiceResult Deactivate(string id);
+    ServiceResult DeactivateRole(string id);
 }

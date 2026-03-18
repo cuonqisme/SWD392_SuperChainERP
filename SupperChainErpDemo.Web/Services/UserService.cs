@@ -1,21 +1,23 @@
 using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.ViewModels.Users;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using SupperChainErpDemo.Web.Data;
 
 namespace SupperChainErpDemo.Web.Services;
 
 public class UserService : IUserService
 {
-    private readonly DemoDataStore _dataStore;
+    private readonly AppDbContext _dbContext;
 
-    public UserService(DemoDataStore dataStore)
+    public UserService(AppDbContext dbContext)
     {
-        _dataStore = dataStore;
+        _dbContext = dbContext;
     }
 
-    public UserIndexViewModel BuildIndex(string? keyword = null, string? statusFilter = null)
+    public UserIndexViewModel GetUserList(string? keyword = null, string? statusFilter = null)
     {
-        var query = _dataStore.Users.AsEnumerable();
+        var query = _dbContext.Users.AsNoTracking().AsEnumerable();
 
         if (!string.IsNullOrWhiteSpace(keyword))
         {
@@ -38,11 +40,11 @@ public class UserService : IUserService
                 .OrderByDescending(user => user.UpdatedDate)
                 .ThenBy(user => user.FullName)
                 .ToList(),
-            RoleNames = _dataStore.Roles.ToDictionary(role => role.RoleId, role => role.RoleName)
+            RoleNames = _dbContext.Roles.AsNoTracking().ToDictionary(role => role.RoleId, role => role.RoleName)
         };
     }
 
-    public UserDetailsViewModel? BuildDetails(string id)
+    public UserDetailsViewModel? GetUserDetails(string id)
     {
         var user = GetById(id);
         if (user is null)
@@ -53,13 +55,13 @@ public class UserService : IUserService
         return new UserDetailsViewModel
         {
             User = user,
-            RoleName = _dataStore.Roles.FirstOrDefault(role => role.RoleId == user.RoleId)?.RoleName ?? "Unknown"
+            RoleName = _dbContext.Roles.AsNoTracking().FirstOrDefault(role => role.RoleId == user.RoleId)?.RoleName ?? "Unknown"
         };
     }
 
-    public UserFormViewModel BuildCreateForm() => PopulateRoleOptions(new UserFormViewModel());
+    public UserFormViewModel PrepareCreateUser() => PopulateRoleOptions(new UserFormViewModel());
 
-    public UserFormViewModel? BuildEditForm(string id)
+    public UserFormViewModel? PrepareUpdateUser(string id)
     {
         var user = GetById(id);
         if (user is null)
@@ -78,9 +80,9 @@ public class UserService : IUserService
     }
 
     private UserAccount? GetById(string id) =>
-        _dataStore.Users.FirstOrDefault(user => user.UserId.Equals(id, StringComparison.OrdinalIgnoreCase));
+        _dbContext.Users.FirstOrDefault(user => user.UserId.Equals(id, StringComparison.OrdinalIgnoreCase));
 
-    public ServiceResult Create(UserFormViewModel model)
+    public ServiceResult CreateUser(UserFormViewModel model)
     {
         PopulateRoleOptions(model);
         var validationError = Validate(model);
@@ -91,10 +93,10 @@ public class UserService : IUserService
 
         var user = new UserAccount
         {
-            UserId = _dataStore.NextUserId(),
+            UserId = IdGenerator.NextId(_dbContext.Users.AsNoTracking().Select(item => item.UserId).ToList(), "USR-"),
             RoleId = model.RoleId,
             Username = model.Username.Trim(),
-            PasswordHash = DemoDataStore.HashPassword(model.Password.Trim()),
+            PasswordHash = PasswordHasher.Hash(model.Password.Trim()),
             FullName = model.FullName.Trim(),
             Email = model.Email.Trim(),
             Phone = model.Phone.Trim(),
@@ -103,11 +105,12 @@ public class UserService : IUserService
             UpdatedDate = DateTime.UtcNow
         };
 
-        _dataStore.Users.Add(user);
+        _dbContext.Users.Add(user);
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"User {user.FullName} was created and assigned to the selected role.");
     }
 
-    public ServiceResult Update(string id, UserFormViewModel model)
+    public ServiceResult UpdateUser(string id, UserFormViewModel model)
     {
         PopulateRoleOptions(model);
         var user = GetById(id);
@@ -131,13 +134,14 @@ public class UserService : IUserService
 
         if (!string.IsNullOrWhiteSpace(model.Password))
         {
-            user.PasswordHash = DemoDataStore.HashPassword(model.Password.Trim());
+            user.PasswordHash = PasswordHasher.Hash(model.Password.Trim());
         }
 
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"User {user.FullName} was updated successfully.");
     }
 
-    public ServiceResult ChangeStatus(string id, RecordStatus status)
+    public ServiceResult UpdateUserStatus(string id, RecordStatus status)
     {
         var user = GetById(id);
         if (user is null)
@@ -145,7 +149,7 @@ public class UserService : IUserService
             return ServiceResult.Failure("The selected user could not be found.");
         }
 
-        var role = _dataStore.Roles.FirstOrDefault(item => item.RoleId == user.RoleId);
+        var role = _dbContext.Roles.FirstOrDefault(item => item.RoleId == user.RoleId);
         if (status == RecordStatus.Active && role?.Status != RecordStatus.Active)
         {
             return ServiceResult.Failure("Users can only be activated when their assigned role is active.");
@@ -153,12 +157,13 @@ public class UserService : IUserService
 
         user.Status = status;
         user.UpdatedDate = DateTime.UtcNow;
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"User {user.FullName} status changed to {status}.");
     }
 
     private string? Validate(UserFormViewModel model, string? currentId = null)
     {
-        var role = _dataStore.Roles.FirstOrDefault(item => item.RoleId == model.RoleId);
+        var role = _dbContext.Roles.FirstOrDefault(item => item.RoleId == model.RoleId);
         if (role is null)
         {
             return "Please choose a valid role.";
@@ -184,7 +189,7 @@ public class UserService : IUserService
         var username = model.Username.Trim();
         var email = model.Email.Trim();
 
-        var duplicateUsername = _dataStore.Users.Any(user =>
+        var duplicateUsername = _dbContext.Users.Any(user =>
             !user.UserId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
             user.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
@@ -193,7 +198,7 @@ public class UserService : IUserService
             return "Username already exists.";
         }
 
-        var duplicateEmail = _dataStore.Users.Any(user =>
+        var duplicateEmail = _dbContext.Users.Any(user =>
             !user.UserId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
             user.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 
@@ -202,7 +207,7 @@ public class UserService : IUserService
 
     private UserFormViewModel PopulateRoleOptions(UserFormViewModel model)
     {
-        model.RoleOptions = _dataStore.Roles
+        model.RoleOptions = _dbContext.Roles.AsNoTracking()
             .Where(role => role.Status == RecordStatus.Active || role.RoleId == model.RoleId)
             .OrderBy(role => role.RoleName)
             .Select(role => new SelectListItem(role.RoleName, role.RoleId))

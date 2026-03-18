@@ -1,0 +1,28 @@
+@model SupperChainErpDemo.Web.ViewModels.TransferNotes.TransferNoteFormViewModel
+@{
+    ViewData["Title"] = "Update Transfer Note";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-43</p>
+        <h2>Update transfer draft</h2>
+        <p>Only transfer notes in Draft status can be edited before manager review.</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index">Back to list</a>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions mt-4">
+            <button class="btn btn-primary" type="submit">Save Transfer Note</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,21 +1,23 @@
 using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.ViewModels.Products;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using SupperChainErpDemo.Web.Data;
 
 namespace SupperChainErpDemo.Web.Services;
 
 public class ProductService : IProductService
 {
-    private readonly DemoDataStore _dataStore;
+    private readonly AppDbContext _dbContext;
 
-    public ProductService(DemoDataStore dataStore)
+    public ProductService(AppDbContext dbContext)
     {
-        _dataStore = dataStore;
+        _dbContext = dbContext;
     }
 
-    public ProductIndexViewModel BuildIndex(string? statusFilter = null, string? categoryId = null)
+    public ProductIndexViewModel GetProductList(string? statusFilter = null, string? categoryId = null)
     {
-        var query = _dataStore.Products.AsEnumerable();
+        var query = _dbContext.Products.AsNoTracking().AsEnumerable();
 
         if (Enum.TryParse<RecordStatus>(statusFilter, true, out var status))
         {
@@ -35,11 +37,11 @@ public class ProductService : IProductService
                 .OrderByDescending(product => product.UpdatedDate)
                 .ThenBy(product => product.ProductName)
                 .ToList(),
-            CategoryNames = _dataStore.Categories.ToDictionary(category => category.CategoryId, category => category.CategoryName)
+            CategoryNames = _dbContext.Categories.AsNoTracking().ToDictionary(category => category.CategoryId, category => category.CategoryName)
         };
     }
 
-    public ProductDetailsViewModel? BuildDetails(string id)
+    public ProductDetailsViewModel? GetProductDetails(string id)
     {
         var product = GetById(id);
         if (product is null)
@@ -50,13 +52,13 @@ public class ProductService : IProductService
         return new ProductDetailsViewModel
         {
             Product = product,
-            CategoryName = _dataStore.Categories.FirstOrDefault(category => category.CategoryId == product.CategoryId)?.CategoryName ?? "Unknown"
+            CategoryName = _dbContext.Categories.AsNoTracking().FirstOrDefault(category => category.CategoryId == product.CategoryId)?.CategoryName ?? "Unknown"
         };
     }
 
-    public ProductFormViewModel BuildCreateForm() => PopulateCategoryOptions(new ProductFormViewModel());
+    public ProductFormViewModel PrepareCreateProduct() => PopulateCategoryOptions(new ProductFormViewModel());
 
-    public ProductFormViewModel? BuildEditForm(string id)
+    public ProductFormViewModel? PrepareUpdateProduct(string id)
     {
         var product = GetById(id);
         if (product is null)
@@ -74,10 +76,43 @@ public class ProductService : IProductService
         });
     }
 
-    private Product? GetById(string id) =>
-        _dataStore.Products.FirstOrDefault(product => product.ProductId.Equals(id, StringComparison.OrdinalIgnoreCase));
+    public IReadOnlyList<SelectListItem> GetProductOptions(IEnumerable<string>? includeProductIds = null)
+    {
+        var selectedIds = includeProductIds?
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
-    public ServiceResult Create(ProductFormViewModel model)
+        return _dbContext.Products.AsNoTracking()
+            .Where(product => product.Status == RecordStatus.Active || selectedIds.Contains(product.ProductId))
+            .OrderBy(product => product.ProductName)
+            .Select(product => new SelectListItem(
+                $"{product.ProductName} ({product.Sku})",
+                product.ProductId))
+            .ToList();
+    }
+
+    public IReadOnlyDictionary<string, Product> GetProductCatalog(IEnumerable<string> productIds)
+    {
+        var ids = productIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (ids.Count == 0)
+        {
+            return new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        return _dbContext.Products.AsNoTracking()
+            .Where(product => ids.Contains(product.ProductId))
+            .ToDictionary(product => product.ProductId, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private Product? GetById(string id) =>
+        _dbContext.Products.FirstOrDefault(product => product.ProductId.Equals(id, StringComparison.OrdinalIgnoreCase));
+
+    public ServiceResult CreateProduct(ProductFormViewModel model)
     {
         PopulateCategoryOptions(model);
         var category = Validate(model);
@@ -86,7 +121,7 @@ public class ProductService : IProductService
             return ServiceResult.Failure("Please use a valid active category and a unique barcode before creating the product.");
         }
 
-        var productId = _dataStore.NextProductId();
+        var productId = IdGenerator.NextId(_dbContext.Products.AsNoTracking().Select(item => item.ProductId).ToList(), "PRO-");
         var product = new Product
         {
             ProductId = productId,
@@ -101,11 +136,12 @@ public class ProductService : IProductService
             UpdatedDate = DateTime.UtcNow
         };
 
-        _dataStore.Products.Add(product);
+        _dbContext.Products.Add(product);
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"Product {product.ProductName} was created with SKU {product.Sku}.");
     }
 
-    public ServiceResult Update(string id, ProductFormViewModel model)
+    public ServiceResult UpdateProduct(string id, ProductFormViewModel model)
     {
         PopulateCategoryOptions(model);
         var product = GetById(id);
@@ -128,10 +164,11 @@ public class ProductService : IProductService
         product.Sku = CategoryService.BuildSku(category.SkuPrefix, product.ProductId);
         product.UpdatedDate = DateTime.UtcNow;
 
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"Product {product.ProductName} was updated successfully.");
     }
 
-    public ServiceResult Deactivate(string id)
+    public ServiceResult DeactivateProduct(string id)
     {
         var product = GetById(id);
         if (product is null)
@@ -141,6 +178,7 @@ public class ProductService : IProductService
 
         product.Status = RecordStatus.Inactive;
         product.UpdatedDate = DateTime.UtcNow;
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"Product {product.ProductName} was deactivated successfully.");
     }
 
@@ -151,13 +189,13 @@ public class ProductService : IProductService
             return null;
         }
 
-        var category = _dataStore.Categories.FirstOrDefault(item => item.CategoryId == model.CategoryId);
+        var category = _dbContext.Categories.FirstOrDefault(item => item.CategoryId == model.CategoryId);
         if (category?.Status != RecordStatus.Active)
         {
             return null;
         }
 
-        var duplicateBarcode = _dataStore.Products.Any(product =>
+        var duplicateBarcode = _dbContext.Products.Any(product =>
             !product.ProductId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
             product.Barcode.Equals(model.Barcode.Trim(), StringComparison.OrdinalIgnoreCase));
 
@@ -166,7 +204,7 @@ public class ProductService : IProductService
 
     private ProductFormViewModel PopulateCategoryOptions(ProductFormViewModel model)
     {
-        model.CategoryOptions = _dataStore.Categories
+        model.CategoryOptions = _dbContext.Categories.AsNoTracking()
             .Where(category => category.Status == RecordStatus.Active || category.CategoryId == model.CategoryId)
             .OrderBy(category => category.CategoryName)
             .Select(category => new SelectListItem(category.CategoryName, category.CategoryId))

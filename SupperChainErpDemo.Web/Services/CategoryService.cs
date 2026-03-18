@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using SupperChainErpDemo.Web.Data;
 using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.ViewModels.Categories;
 
@@ -5,16 +7,16 @@ namespace SupperChainErpDemo.Web.Services;
 
 public class CategoryService : ICategoryService
 {
-    private readonly DemoDataStore _dataStore;
+    private readonly AppDbContext _dbContext;
 
-    public CategoryService(DemoDataStore dataStore)
+    public CategoryService(AppDbContext dbContext)
     {
-        _dataStore = dataStore;
+        _dbContext = dbContext;
     }
 
-    public CategoryIndexViewModel BuildIndex(string? statusFilter = null)
+    public CategoryIndexViewModel GetCategoryList(string? statusFilter = null)
     {
-        var query = _dataStore.Categories.AsEnumerable();
+        var query = _dbContext.Categories.AsNoTracking().AsEnumerable();
 
         if (Enum.TryParse<RecordStatus>(statusFilter, true, out var status))
         {
@@ -25,13 +27,13 @@ public class CategoryService : ICategoryService
         {
             StatusFilter = statusFilter,
             Categories = query.OrderBy(category => category.CategoryName).ToList(),
-            ProductCountByCategory = _dataStore.Products
+            ProductCountByCategory = _dbContext.Products.AsNoTracking()
                 .GroupBy(product => product.CategoryId)
                 .ToDictionary(group => group.Key, group => group.Count())
         };
     }
 
-    public CategoryDetailsViewModel? BuildDetails(string id)
+    public CategoryDetailsViewModel? GetCategoryDetails(string id)
     {
         var category = GetById(id);
         if (category is null)
@@ -42,16 +44,16 @@ public class CategoryService : ICategoryService
         return new CategoryDetailsViewModel
         {
             Category = category,
-            Products = _dataStore.Products
+            Products = _dbContext.Products.AsNoTracking()
                 .Where(product => product.CategoryId == category.CategoryId)
                 .OrderBy(product => product.ProductName)
                 .ToList()
         };
     }
 
-    public CategoryFormViewModel BuildCreateForm() => new();
+    public CategoryFormViewModel PrepareCreateCategory() => new();
 
-    public CategoryFormViewModel? BuildEditForm(string id)
+    public CategoryFormViewModel? PrepareUpdateCategory(string id)
     {
         var category = GetById(id);
         if (category is null)
@@ -68,9 +70,9 @@ public class CategoryService : ICategoryService
     }
 
     private Category? GetById(string id) =>
-        _dataStore.Categories.FirstOrDefault(category => category.CategoryId.Equals(id, StringComparison.OrdinalIgnoreCase));
+        _dbContext.Categories.FirstOrDefault(category => category.CategoryId.Equals(id, StringComparison.OrdinalIgnoreCase));
 
-    public ServiceResult Create(CategoryFormViewModel model)
+    public ServiceResult CreateCategory(CategoryFormViewModel model)
     {
         var validationError = Validate(model);
         if (validationError is not null)
@@ -80,7 +82,7 @@ public class CategoryService : ICategoryService
 
         var category = new Category
         {
-            CategoryId = _dataStore.NextCategoryId(),
+            CategoryId = IdGenerator.NextId(_dbContext.Categories.AsNoTracking().Select(item => item.CategoryId).ToList(), "CAT-"),
             CategoryName = model.CategoryName.Trim(),
             Description = model.Description.Trim(),
             SkuPrefix = model.SkuPrefix.Trim().ToUpperInvariant(),
@@ -89,11 +91,12 @@ public class CategoryService : ICategoryService
             UpdatedDate = DateTime.UtcNow
         };
 
-        _dataStore.Categories.Add(category);
+        _dbContext.Categories.Add(category);
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"Category {category.CategoryName} was created successfully.");
     }
 
-    public ServiceResult Update(string id, CategoryFormViewModel model)
+    public ServiceResult UpdateCategory(string id, CategoryFormViewModel model)
     {
         var category = GetById(id);
         if (category is null)
@@ -112,16 +115,17 @@ public class CategoryService : ICategoryService
         category.SkuPrefix = model.SkuPrefix.Trim().ToUpperInvariant();
         category.UpdatedDate = DateTime.UtcNow;
 
-        foreach (var product in _dataStore.Products.Where(item => item.CategoryId == category.CategoryId))
+        foreach (var product in _dbContext.Products.Where(item => item.CategoryId == category.CategoryId))
         {
             product.Sku = BuildSku(category.SkuPrefix, product.ProductId);
             product.UpdatedDate = DateTime.UtcNow;
         }
 
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"Category {category.CategoryName} was updated successfully.");
     }
 
-    public ServiceResult Deactivate(string id)
+    public ServiceResult DeactivateCategory(string id)
     {
         var category = GetById(id);
         if (category is null)
@@ -129,13 +133,14 @@ public class CategoryService : ICategoryService
             return ServiceResult.Failure("The selected category could not be found.");
         }
 
-        if (_dataStore.Products.Any(product => product.CategoryId == category.CategoryId && product.Status == RecordStatus.Active))
+        if (_dbContext.Products.Any(product => product.CategoryId == category.CategoryId && product.Status == RecordStatus.Active))
         {
             return ServiceResult.Failure("Deactivate or move active products before deactivating this category.");
         }
 
         category.Status = RecordStatus.Inactive;
         category.UpdatedDate = DateTime.UtcNow;
+        _dbContext.SaveChanges();
         return ServiceResult.Success($"Category {category.CategoryName} was deactivated successfully.");
     }
 
@@ -156,7 +161,7 @@ public class CategoryService : ICategoryService
         var normalizedName = model.CategoryName.Trim();
         var normalizedPrefix = model.SkuPrefix.Trim().ToUpperInvariant();
 
-        var duplicateName = _dataStore.Categories.Any(category =>
+        var duplicateName = _dbContext.Categories.Any(category =>
             !category.CategoryId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
             category.CategoryName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
 
@@ -165,7 +170,7 @@ public class CategoryService : ICategoryService
             return "Category name must be unique.";
         }
 
-        var duplicatePrefix = _dataStore.Categories.Any(category =>
+        var duplicatePrefix = _dbContext.Categories.Any(category =>
             !category.CategoryId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
             category.SkuPrefix.Equals(normalizedPrefix, StringComparison.OrdinalIgnoreCase));
 
