@@ -1,0 +1,43 @@
+@model SupperChainErpDemo.Web.Models.Category
+@{
+    ViewData["Title"] = "View Category";
+    var products = ViewBag.Products as IEnumerable<SupperChainErpDemo.Web.Models.Product> ?? Enumerable.Empty<SupperChainErpDemo.Web.Models.Product>();
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-14</p>
+        <h2>@Model.CategoryName</h2>
+        <p>Xem chi tiết category và các product đang thuộc nhóm này.</p>
+    </div>
+    <div class="action-stack">
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.CategoryId">Edit</a>
+        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+    </div>
+</section>
+
+<section class="content-grid">
+    <article class="content-panel">
+        <h3>Category summary</h3>
+        <dl class="detail-grid">
+            <dt>Category ID</dt>
+            <dd>@Model.CategoryId</dd>
+            <dt>SKU Prefix</dt>
+            <dd>@Model.SkuPrefix</dd>
+            <dt>Status</dt>
+            <dd><span class="status-pill @(Model.Status == RecordStatus.Active ? "active" : "inactive")">@Model.Status</span></dd>
+            <dt>Description</dt>
+            <dd>@Model.Description</dd>
+        </dl>
+    </article>
+
+    <article class="content-panel">
+        <h3>Mapped products</h3>
+        <ul class="plain-list">
+            @foreach (var product in products)
+            {
+                <li>@product.ProductName - @product.Sku</li>
+            }
+        </ul>
+    </article>
+</section>

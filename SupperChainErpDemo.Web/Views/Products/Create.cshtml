@@ -1,0 +1,27 @@
+@model SupperChainErpDemo.Web.ViewModels.Products.ProductFormViewModel
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-09</p>
+        <h2>Create product</h2>
+        <p>Tạo product mới, validate category active và barcode duy nhất.</p>
+    </div>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Product</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

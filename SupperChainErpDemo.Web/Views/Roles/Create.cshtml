@@ -1,0 +1,27 @@
+@model SupperChainErpDemo.Web.ViewModels.Roles.RoleFormViewModel
+@{
+    ViewData["Title"] = "Create Role";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-05</p>
+        <h2>Create role</h2>
+        <p>Khởi tạo vai trò mới, validate tên role và gắn permission ngay khi tạo.</p>
+    </div>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Role</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

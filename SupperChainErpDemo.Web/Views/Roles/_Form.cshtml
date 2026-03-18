@@ -1,0 +1,28 @@
+@model SupperChainErpDemo.Web.ViewModels.Roles.RoleFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <label asp-for="RoleName" class="form-label"></label>
+        <input asp-for="RoleName" class="form-control" />
+        <span asp-validation-for="RoleName" class="text-danger"></span>
+    </div>
+    <div class="col-lg-6">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Permissions</label>
+        <div class="checkbox-grid">
+            @foreach (var permission in Model.AvailablePermissions)
+            {
+                <label class="checkbox-tile">
+                    <input type="checkbox" name="SelectedPermissions" value="@permission" @(Model.SelectedPermissions.Contains(permission) ? "checked" : null) />
+                    <span>@permission</span>
+                </label>
+            }
+        </div>
+    </div>
+</div>

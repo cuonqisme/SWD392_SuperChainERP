@@ -1,0 +1,27 @@
+@model SupperChainErpDemo.Web.ViewModels.Categories.CategoryFormViewModel
+@{
+    ViewData["Title"] = "Create Category";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-13</p>
+        <h2>Create category</h2>
+        <p>Khởi tạo nhóm hàng mới và chuẩn hóa SKU prefix cho sản phẩm tương lai.</p>
+    </div>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Category</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,27 @@
+@model SupperChainErpDemo.Web.ViewModels.Users.UserFormViewModel
+@{
+    ViewData["Title"] = "Update User";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-03</p>
+        <h2>Update user</h2>
+        <p>Chỉnh sửa hồ sơ người dùng, giữ nguyên password nếu không nhập lại.</p>
+    </div>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update User</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

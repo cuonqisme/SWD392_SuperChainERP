@@ -1,0 +1,25 @@
+@using System.Text.Json
+@using SupperChainErpDemo.Web.Services
+@{
+    NotificationMessage? notification = null;
+    if (TempData.TryGetValue(NotificationService.TempDataKey, out var payload) && payload is string json)
+    {
+        notification = JsonSerializer.Deserialize<NotificationMessage>(json);
+    }
+
+    if (notification is null)
+    {
+        return;
+    }
+
+    var cssClass = notification.Type switch
+    {
+        NotificationType.Success => "alert-success-soft",
+        NotificationType.Error => "alert-danger-soft",
+        _ => "alert-info-soft"
+    };
+}
+<div class="app-alert @cssClass">
+    <strong>@notification.Title</strong>
+    <span>@notification.Message</span>
+</div>

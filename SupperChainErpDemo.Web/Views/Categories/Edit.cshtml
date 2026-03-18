@@ -1,0 +1,27 @@
+@model SupperChainErpDemo.Web.ViewModels.Categories.CategoryFormViewModel
+@{
+    ViewData["Title"] = "Update Category";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-15</p>
+        <h2>Update category</h2>
+        <p>Cập nhật category sẽ đồng bộ lại SKU hiển thị của các sản phẩm cùng nhóm.</p>
+    </div>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update Category</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

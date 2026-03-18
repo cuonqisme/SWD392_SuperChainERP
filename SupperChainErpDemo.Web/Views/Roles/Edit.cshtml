@@ -1,0 +1,27 @@
+@model SupperChainErpDemo.Web.ViewModels.Roles.RoleFormViewModel
+@{
+    ViewData["Title"] = "Update Role";
+}
+
+<section class="page-intro">
+    <div>
+        <p class="eyebrow">UC-07</p>
+        <h2>Update role</h2>
+        <p>Điều chỉnh thông tin role và permission mapping theo luồng update role.</p>
+    </div>
+</section>
+
+<section class="content-panel">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update Role</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

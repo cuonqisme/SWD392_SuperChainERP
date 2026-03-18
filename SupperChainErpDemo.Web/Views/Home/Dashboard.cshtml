@@ -1,0 +1,57 @@
+@model SupperChainErpDemo.Web.ViewModels.Home.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="hero-panel">
+    <div>
+        <p class="eyebrow">SupperChain ERP</p>
+    </div>
+    <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" asp-controller="Users" asp-action="Create">Create User</a>
+        <a class="btn btn-outline-light btn-lg" asp-controller="Products" asp-action="Create">Create Product</a>
+    </div>
+</section>
+
+<section class="stat-grid">
+    @foreach (var card in Model.StatCards)
+    {
+        <article class="stat-card">
+            <span>@card.Title</span>
+            <strong>@card.Value</strong>
+            <small>@card.Subtitle</small>
+        </article>
+    }
+</section>
+
+<section class="content-grid">
+    <article class="content-panel">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Execution flow</p>
+                <h3>Use case pipeline</h3>
+            </div>
+        </div>
+        <ol class="flow-list">
+            @foreach (var flow in Model.UseCaseFlows)
+            {
+                <li>@flow</li>
+            }
+        </ol>
+    </article>
+
+    <article class="content-panel">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Recent updates</p>
+                <h3>Demo data highlights</h3>
+            </div>
+        </div>
+        <ul class="plain-list">
+            @foreach (var note in Model.RecentHighlights)
+            {
+                <li>@note</li>
+            }
+        </ul>
+    </article>
+</section>
