@@ -6,23 +6,23 @@ namespace SupperChainErpDemo.Web.Controllers;
 
 public class RolesController : Controller
 {
+    private readonly IRoleManagementCoordinator _roleManagementCoordinator;
     private readonly INotificationService _notificationService;
-    private readonly IRoleService _roleService;
 
-    public RolesController(IRoleService roleService, INotificationService notificationService)
+    public RolesController(IRoleManagementCoordinator roleManagementCoordinator, INotificationService notificationService)
     {
-        _roleService = roleService;
+        _roleManagementCoordinator = roleManagementCoordinator;
         _notificationService = notificationService;
     }
 
     public IActionResult Index(string? statusFilter)
     {
-        return View(_roleService.BuildIndex(statusFilter));
+        return View(_roleManagementCoordinator.ShowRoleList(statusFilter));
     }
 
     public IActionResult Details(string id)
     {
-        var role = _roleService.GetById(id);
+        var role = _roleManagementCoordinator.ShowRoleDetails(id);
         if (role is null)
         {
             _notificationService.Error("Role not found", "The requested role does not exist anymore.");
@@ -32,7 +32,7 @@ public class RolesController : Controller
         return View(role);
     }
 
-    public IActionResult Create() => View(_roleService.BuildCreateForm());
+    public IActionResult Create() => View(_roleManagementCoordinator.PrepareCreateRole());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -40,14 +40,14 @@ public class RolesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            model = MergeForm(_roleService.BuildCreateForm(), model);
+            model = MergeForm(_roleManagementCoordinator.PrepareCreateRole(), model);
             return View(model);
         }
 
-        var result = _roleService.Create(model);
+        var result = _roleManagementCoordinator.CreateRole(model);
         if (!result.Succeeded)
         {
-            model = MergeForm(_roleService.BuildCreateForm(), model);
+            model = MergeForm(_roleManagementCoordinator.PrepareCreateRole(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -58,7 +58,7 @@ public class RolesController : Controller
 
     public IActionResult Edit(string id)
     {
-        var viewModel = _roleService.BuildEditForm(id);
+        var viewModel = _roleManagementCoordinator.PrepareUpdateRole(id);
         if (viewModel is null)
         {
             _notificationService.Error("Role not found", "The requested role does not exist anymore.");
@@ -74,14 +74,14 @@ public class RolesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            model = MergeForm(_roleService.BuildEditForm(id) ?? _roleService.BuildCreateForm(), model);
+            model = MergeForm(_roleManagementCoordinator.PrepareUpdateRole(id) ?? _roleManagementCoordinator.PrepareCreateRole(), model);
             return View(model);
         }
 
-        var result = _roleService.Update(id, model);
+        var result = _roleManagementCoordinator.UpdateRole(id, model);
         if (!result.Succeeded)
         {
-            model = MergeForm(_roleService.BuildEditForm(id) ?? _roleService.BuildCreateForm(), model);
+            model = MergeForm(_roleManagementCoordinator.PrepareUpdateRole(id) ?? _roleManagementCoordinator.PrepareCreateRole(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -94,7 +94,7 @@ public class RolesController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Deactivate(string id)
     {
-        var result = _roleService.Deactivate(id);
+        var result = _roleManagementCoordinator.DeactivateRole(id);
         if (!result.Succeeded)
         {
             _notificationService.Error("Role status blocked", result.Message);

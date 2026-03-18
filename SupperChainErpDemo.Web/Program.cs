@@ -17,6 +17,10 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IUserManagementCoordinator, UserManagementCoordinator>();
+builder.Services.AddScoped<IRoleManagementCoordinator, RoleManagementCoordinator>();
+builder.Services.AddScoped<ICategoryManagementCoordinator, CategoryManagementCoordinator>();
+builder.Services.AddScoped<IProductManagementCoordinator, ProductManagementCoordinator>();
 
 var app = builder.Build();
 

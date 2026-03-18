@@ -6,25 +6,25 @@ namespace SupperChainErpDemo.Web.Controllers;
 
 public class ProductsController : Controller
 {
+    private readonly IProductManagementCoordinator _productManagementCoordinator;
     private readonly INotificationService _notificationService;
-    private readonly IProductService _productService;
 
     public ProductsController(
-        IProductService productService,
+        IProductManagementCoordinator productManagementCoordinator,
         INotificationService notificationService)
     {
-        _productService = productService;
+        _productManagementCoordinator = productManagementCoordinator;
         _notificationService = notificationService;
     }
 
     public IActionResult Index(string? statusFilter, string? categoryFilter)
     {
-        return View(_productService.BuildIndex(statusFilter, categoryFilter));
+        return View(_productManagementCoordinator.ShowProductList(statusFilter, categoryFilter));
     }
 
     public IActionResult Details(string id)
     {
-        var viewModel = _productService.BuildDetails(id);
+        var viewModel = _productManagementCoordinator.ShowProductDetails(id);
         if (viewModel is null)
         {
             _notificationService.Error("Product not found", "The requested product does not exist anymore.");
@@ -34,7 +34,7 @@ public class ProductsController : Controller
         return View(viewModel);
     }
 
-    public IActionResult Create() => View(_productService.BuildCreateForm());
+    public IActionResult Create() => View(_productManagementCoordinator.PrepareCreateProduct());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -42,14 +42,14 @@ public class ProductsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            model = MergeForm(_productService.BuildCreateForm(), model);
+            model = MergeForm(_productManagementCoordinator.PrepareCreateProduct(), model);
             return View(model);
         }
 
-        var result = _productService.Create(model);
+        var result = _productManagementCoordinator.CreateProduct(model);
         if (!result.Succeeded)
         {
-            model = MergeForm(_productService.BuildCreateForm(), model);
+            model = MergeForm(_productManagementCoordinator.PrepareCreateProduct(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -60,7 +60,7 @@ public class ProductsController : Controller
 
     public IActionResult Edit(string id)
     {
-        var viewModel = _productService.BuildEditForm(id);
+        var viewModel = _productManagementCoordinator.PrepareUpdateProduct(id);
         if (viewModel is null)
         {
             _notificationService.Error("Product not found", "The requested product does not exist anymore.");
@@ -76,14 +76,14 @@ public class ProductsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            model = MergeForm(_productService.BuildEditForm(id) ?? _productService.BuildCreateForm(), model);
+            model = MergeForm(_productManagementCoordinator.PrepareUpdateProduct(id) ?? _productManagementCoordinator.PrepareCreateProduct(), model);
             return View(model);
         }
 
-        var result = _productService.Update(id, model);
+        var result = _productManagementCoordinator.UpdateProduct(id, model);
         if (!result.Succeeded)
         {
-            model = MergeForm(_productService.BuildEditForm(id) ?? _productService.BuildCreateForm(), model);
+            model = MergeForm(_productManagementCoordinator.PrepareUpdateProduct(id) ?? _productManagementCoordinator.PrepareCreateProduct(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -96,7 +96,7 @@ public class ProductsController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Deactivate(string id)
     {
-        var result = _productService.Deactivate(id);
+        var result = _productManagementCoordinator.DeactivateProduct(id);
         if (!result.Succeeded)
         {
             _notificationService.Error("Product status blocked", result.Message);

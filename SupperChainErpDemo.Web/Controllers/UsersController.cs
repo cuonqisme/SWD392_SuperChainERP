@@ -7,25 +7,25 @@ namespace SupperChainErpDemo.Web.Controllers;
 
 public class UsersController : Controller
 {
+    private readonly IUserManagementCoordinator _userManagementCoordinator;
     private readonly INotificationService _notificationService;
-    private readonly IUserService _userService;
 
     public UsersController(
-        IUserService userService,
+        IUserManagementCoordinator userManagementCoordinator,
         INotificationService notificationService)
     {
-        _userService = userService;
+        _userManagementCoordinator = userManagementCoordinator;
         _notificationService = notificationService;
     }
 
     public IActionResult Index(string? keyword, string? statusFilter)
     {
-        return View(_userService.BuildIndex(keyword, statusFilter));
+        return View(_userManagementCoordinator.ShowUserList(keyword, statusFilter));
     }
 
     public IActionResult Details(string id)
     {
-        var viewModel = _userService.BuildDetails(id);
+        var viewModel = _userManagementCoordinator.ShowUserDetails(id);
         if (viewModel is null)
         {
             _notificationService.Error("User not found", "The requested user does not exist anymore.");
@@ -35,7 +35,7 @@ public class UsersController : Controller
         return View(viewModel);
     }
 
-    public IActionResult Create() => View(_userService.BuildCreateForm());
+    public IActionResult Create() => View(_userManagementCoordinator.PrepareCreateUser());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -43,14 +43,14 @@ public class UsersController : Controller
     {
         if (!ModelState.IsValid)
         {
-            model = MergeForm(_userService.BuildCreateForm(), model);
+            model = MergeForm(_userManagementCoordinator.PrepareCreateUser(), model);
             return View(model);
         }
 
-        var result = _userService.Create(model);
+        var result = _userManagementCoordinator.CreateUser(model);
         if (!result.Succeeded)
         {
-            model = MergeForm(_userService.BuildCreateForm(), model);
+            model = MergeForm(_userManagementCoordinator.PrepareCreateUser(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -61,7 +61,7 @@ public class UsersController : Controller
 
     public IActionResult Edit(string id)
     {
-        var viewModel = _userService.BuildEditForm(id);
+        var viewModel = _userManagementCoordinator.PrepareUpdateUser(id);
         if (viewModel is null)
         {
             _notificationService.Error("User not found", "The requested user does not exist anymore.");
@@ -77,14 +77,14 @@ public class UsersController : Controller
     {
         if (!ModelState.IsValid)
         {
-            model = MergeForm(_userService.BuildEditForm(id) ?? _userService.BuildCreateForm(), model);
+            model = MergeForm(_userManagementCoordinator.PrepareUpdateUser(id) ?? _userManagementCoordinator.PrepareCreateUser(), model);
             return View(model);
         }
 
-        var result = _userService.Update(id, model);
+        var result = _userManagementCoordinator.UpdateUser(id, model);
         if (!result.Succeeded)
         {
-            model = MergeForm(_userService.BuildEditForm(id) ?? _userService.BuildCreateForm(), model);
+            model = MergeForm(_userManagementCoordinator.PrepareUpdateUser(id) ?? _userManagementCoordinator.PrepareCreateUser(), model);
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
@@ -97,7 +97,7 @@ public class UsersController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult ChangeStatus(string id, RecordStatus status)
     {
-        var result = _userService.ChangeStatus(id, status);
+        var result = _userManagementCoordinator.UpdateUserStatus(id, status);
         if (!result.Succeeded)
         {
             _notificationService.Error("User status blocked", result.Message);

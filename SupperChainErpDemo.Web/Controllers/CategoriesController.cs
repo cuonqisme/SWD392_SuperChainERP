@@ -6,25 +6,28 @@ namespace SupperChainErpDemo.Web.Controllers;
 
 public class CategoriesController : Controller
 {
+    private readonly ICategoryManagementCoordinator _categoryManagementCoordinator;
     private readonly ICategoryService _categoryService;
     private readonly INotificationService _notificationService;
 
     public CategoriesController(
+        ICategoryManagementCoordinator categoryManagementCoordinator,
         ICategoryService categoryService,
         INotificationService notificationService)
     {
+        _categoryManagementCoordinator = categoryManagementCoordinator;
         _categoryService = categoryService;
         _notificationService = notificationService;
     }
 
     public IActionResult Index(string? statusFilter)
     {
-        return View(_categoryService.BuildIndex(statusFilter));
+        return View(_categoryManagementCoordinator.ShowCategoryList(statusFilter));
     }
 
     public IActionResult Details(string id)
     {
-        var viewModel = _categoryService.BuildDetails(id);
+        var viewModel = _categoryManagementCoordinator.ShowCategoryDetails(id);
         if (viewModel is null)
         {
             _notificationService.Error("Category not found", "The requested category does not exist anymore.");
@@ -34,7 +37,7 @@ public class CategoriesController : Controller
         return View(viewModel);
     }
 
-    public IActionResult Create() => View(_categoryService.BuildCreateForm());
+    public IActionResult Create() => View(_categoryManagementCoordinator.PrepareCreateCategory());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -45,7 +48,7 @@ public class CategoriesController : Controller
             return View(model);
         }
 
-        var result = _categoryService.Create(model);
+        var result = _categoryManagementCoordinator.CreateCategory(model);
         if (!result.Succeeded)
         {
             ModelState.AddModelError(string.Empty, result.Message);
@@ -58,7 +61,7 @@ public class CategoriesController : Controller
 
     public IActionResult Edit(string id)
     {
-        var viewModel = _categoryService.BuildEditForm(id);
+        var viewModel = _categoryManagementCoordinator.PrepareUpdateCategory(id);
         if (viewModel is null)
         {
             _notificationService.Error("Category not found", "The requested category does not exist anymore.");
@@ -77,7 +80,7 @@ public class CategoriesController : Controller
             return View(model);
         }
 
-        var result = _categoryService.Update(id, model);
+        var result = _categoryManagementCoordinator.UpdateCategory(id, model);
         if (!result.Succeeded)
         {
             ModelState.AddModelError(string.Empty, result.Message);
@@ -92,7 +95,7 @@ public class CategoriesController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Deactivate(string id)
     {
-        var result = _categoryService.Deactivate(id);
+        var result = _categoryManagementCoordinator.DeactivateCategory(id);
         if (!result.Succeeded)
         {
             _notificationService.Error("Category status blocked", result.Message);
