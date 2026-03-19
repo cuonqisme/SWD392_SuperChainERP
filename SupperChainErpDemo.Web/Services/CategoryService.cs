@@ -70,7 +70,7 @@ public class CategoryService : ICategoryService
     }
 
     private Category? GetById(string id) =>
-        _dbContext.Categories.FirstOrDefault(category => category.CategoryId.Equals(id, StringComparison.OrdinalIgnoreCase));
+        _dbContext.Categories.FirstOrDefault(category => category.CategoryId == id);
 
     public ServiceResult CreateCategory(CategoryFormViewModel model)
     {
@@ -162,8 +162,8 @@ public class CategoryService : ICategoryService
         var normalizedPrefix = model.SkuPrefix.Trim().ToUpperInvariant();
 
         var duplicateName = _dbContext.Categories.Any(category =>
-            !category.CategoryId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
-            category.CategoryName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
+            category.CategoryId != currentId &&
+            category.CategoryName.ToUpper() == normalizedName.ToUpper());
 
         if (duplicateName)
         {
@@ -171,8 +171,8 @@ public class CategoryService : ICategoryService
         }
 
         var duplicatePrefix = _dbContext.Categories.Any(category =>
-            !category.CategoryId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
-            category.SkuPrefix.Equals(normalizedPrefix, StringComparison.OrdinalIgnoreCase));
+            category.CategoryId != currentId &&
+            category.SkuPrefix.ToUpper() == normalizedPrefix);
 
         return duplicatePrefix ? "SKU prefix must be unique." : null;
     }

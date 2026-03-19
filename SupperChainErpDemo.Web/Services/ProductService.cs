@@ -110,7 +110,7 @@ public class ProductService : IProductService
     }
 
     private Product? GetById(string id) =>
-        _dbContext.Products.FirstOrDefault(product => product.ProductId.Equals(id, StringComparison.OrdinalIgnoreCase));
+        _dbContext.Products.FirstOrDefault(product => product.ProductId == id);
 
     public ServiceResult CreateProduct(ProductFormViewModel model)
     {
@@ -195,9 +195,11 @@ public class ProductService : IProductService
             return null;
         }
 
+        var normalizedBarcode = model.Barcode.Trim().ToUpperInvariant();
+
         var duplicateBarcode = _dbContext.Products.Any(product =>
-            !product.ProductId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
-            product.Barcode.Equals(model.Barcode.Trim(), StringComparison.OrdinalIgnoreCase));
+            product.ProductId != currentId &&
+            product.Barcode.ToUpper() == normalizedBarcode);
 
         return duplicateBarcode ? null : category;
     }

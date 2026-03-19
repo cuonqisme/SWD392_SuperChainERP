@@ -80,7 +80,7 @@ public class UserService : IUserService
     }
 
     private UserAccount? GetById(string id) =>
-        _dbContext.Users.FirstOrDefault(user => user.UserId.Equals(id, StringComparison.OrdinalIgnoreCase));
+        _dbContext.Users.FirstOrDefault(user => user.UserId == id);
 
     public ServiceResult CreateUser(UserFormViewModel model)
     {
@@ -188,10 +188,12 @@ public class UserService : IUserService
 
         var username = model.Username.Trim();
         var email = model.Email.Trim();
+        var normalizedUsername = username.ToUpperInvariant();
+        var normalizedEmail = email.ToUpperInvariant();
 
         var duplicateUsername = _dbContext.Users.Any(user =>
-            !user.UserId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
-            user.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            user.UserId != currentId &&
+            user.Username.ToUpper() == normalizedUsername);
 
         if (duplicateUsername)
         {
@@ -199,8 +201,8 @@ public class UserService : IUserService
         }
 
         var duplicateEmail = _dbContext.Users.Any(user =>
-            !user.UserId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
-            user.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            user.UserId != currentId &&
+            user.Email.ToUpper() == normalizedEmail);
 
         return duplicateEmail ? "Email already exists." : null;
     }

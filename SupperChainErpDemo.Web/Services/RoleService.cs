@@ -164,15 +164,15 @@ public class RoleService : IRoleService
         }
 
         var nameExists = _dbContext.Roles.Any(role =>
-            !role.RoleId.Equals(currentId, StringComparison.OrdinalIgnoreCase) &&
-            role.RoleName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
+            role.RoleId != currentId &&
+            role.RoleName.ToUpper() == normalizedName.ToUpper());
 
         return nameExists ? "Role name must be unique." : null;
     }
 
     private Role? LoadRole(string id)
     {
-        var role = _dbContext.Roles.FirstOrDefault(item => item.RoleId.Equals(id, StringComparison.OrdinalIgnoreCase));
+        var role = _dbContext.Roles.FirstOrDefault(item => item.RoleId == id);
         if (role is null)
         {
             return null;

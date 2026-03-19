@@ -2,169 +2,105 @@
 
 Tai lieu nay map use case trong doc sang cac thanh phan code de de trace voi communication diagram.
 
+## Format doc nhanh
+
+Moi use case duoc map theo chuoi:
+
+`Boundary UI -> Controller -> Coordinator -> Service -> Data / Supporting Service`
+
 ## User Management
 
 ### UC-01 Create User
 
-- `Boundary UI`: `Views/Users/Create.cshtml`
-- `Controller`: `UsersController.Create()`
-- `Coordinator`: `IUserManagementCoordinator.PrepareCreateUser()`, `CreateUser()`
-- `Service`: `IUserService.PrepareCreateUser()`, `CreateUser()`
-- `Data`: `AppDbContext.Users`, `AppDbContext.Roles`
+- `Views/Users/Create.cshtml` -> `UsersController.Create()` -> `IUserManagementCoordinator.CreateUser()` -> `IUserService.CreateUser()` -> `AppDbContext.Users`, `AppDbContext.Roles`
 
 ### UC-02 View User
 
-- `Boundary UI`: `Views/Users/Index.cshtml`, `Views/Users/Details.cshtml`
-- `Controller`: `UsersController.Index()`, `UsersController.Details()`
-- `Coordinator`: `ShowUserList()`, `ShowUserDetails()`
-- `Service`: `GetUserList()`, `GetUserDetails()`
+- `Views/Users/Index.cshtml`, `Views/Users/Details.cshtml` -> `UsersController.Index()/Details()` -> `ShowUserList()/ShowUserDetails()` -> `GetUserList()/GetUserDetails()` -> `AppDbContext.Users`, `AppDbContext.Roles`
 
 ### UC-03 Update User
 
-- `Boundary UI`: `Views/Users/Edit.cshtml`
-- `Controller`: `UsersController.Edit()`
-- `Coordinator`: `PrepareUpdateUser()`, `UpdateUser()`
-- `Service`: `PrepareUpdateUser()`, `UpdateUser()`
+- `Views/Users/Edit.cshtml` -> `UsersController.Edit()` -> `PrepareUpdateUser()/UpdateUser()` -> `PrepareUpdateUser()/UpdateUser()` -> `AppDbContext.Users`, `AppDbContext.Roles`
 
 ### UC-04 Update Status User
 
-- `Boundary UI`: `Views/Users/Index.cshtml`
-- `Controller`: `UsersController.ChangeStatus()`
-- `Coordinator`: `UpdateUserStatus()`
-- `Service`: `UpdateUserStatus()`
+- `Views/Users/Index.cshtml` -> `UsersController.ChangeStatus()` -> `UpdateUserStatus()` -> `UpdateUserStatus()` -> `AppDbContext.Users`
 
 ## Role Management
 
 ### UC-05 Create Role
 
-- `Boundary UI`: `Views/Roles/Create.cshtml`
-- `Controller`: `RolesController.Create()`
-- `Coordinator`: `PrepareCreateRole()`, `CreateRole()`
-- `Service`: `PrepareCreateRole()`, `CreateRole()`
-- `Supporting Service`: `PermissionService`
+- `Views/Roles/Create.cshtml` -> `RolesController.Create()` -> `PrepareCreateRole()/CreateRole()` -> `PrepareCreateRole()/CreateRole()` -> `AppDbContext.Roles`, `AppDbContext.RolePermissions`, `PermissionService`
 
 ### UC-06 View Role
 
-- `Boundary UI`: `Views/Roles/Index.cshtml`, `Views/Roles/Details.cshtml`
-- `Controller`: `RolesController.Index()`, `RolesController.Details()`
-- `Coordinator`: `ShowRoleList()`, `ShowRoleDetails()`
-- `Service`: `GetRoleList()`, `GetRoleDetails()`
+- `Views/Roles/Index.cshtml`, `Views/Roles/Details.cshtml` -> `RolesController.Index()/Details()` -> `ShowRoleList()/ShowRoleDetails()` -> `GetRoleList()/GetRoleDetails()` -> `AppDbContext.Roles`, `AppDbContext.RolePermissions`
 
 ### UC-07 Update Role
 
-- `Boundary UI`: `Views/Roles/Edit.cshtml`
-- `Controller`: `RolesController.Edit()`
-- `Coordinator`: `PrepareUpdateRole()`, `UpdateRole()`
-- `Service`: `PrepareUpdateRole()`, `UpdateRole()`
+- `Views/Roles/Edit.cshtml` -> `RolesController.Edit()` -> `PrepareUpdateRole()/UpdateRole()` -> `PrepareUpdateRole()/UpdateRole()` -> `AppDbContext.Roles`, `AppDbContext.RolePermissions`, `PermissionService`
 
 ### UC-08 Deactivate Role
 
-- `Boundary UI`: `Views/Roles/Index.cshtml`
-- `Controller`: `RolesController.Deactivate()`
-- `Coordinator`: `DeactivateRole()`
-- `Service`: `DeactivateRole()`
+- `Views/Roles/Index.cshtml` -> `RolesController.Deactivate()` -> `DeactivateRole()` -> `DeactivateRole()` -> `AppDbContext.Roles`, `AppDbContext.Users`
 
 ## Product Management
 
 ### UC-09 Create Product
 
-- `Boundary UI`: `Views/Products/Create.cshtml`
-- `Controller`: `ProductsController.Create()`
-- `Coordinator`: `PrepareCreateProduct()`, `CreateProduct()`
-- `Service`: `PrepareCreateProduct()`, `CreateProduct()`
+- `Views/Products/Create.cshtml` -> `ProductsController.Create()` -> `PrepareCreateProduct()/CreateProduct()` -> `PrepareCreateProduct()/CreateProduct()` -> `AppDbContext.Products`, `AppDbContext.Categories`
 
 ### UC-10 View Product
 
-- `Boundary UI`: `Views/Products/Index.cshtml`, `Views/Products/Details.cshtml`
-- `Controller`: `ProductsController.Index()`, `ProductsController.Details()`
-- `Coordinator`: `ShowProductList()`, `ShowProductDetails()`
-- `Service`: `GetProductList()`, `GetProductDetails()`
+- `Views/Products/Index.cshtml`, `Views/Products/Details.cshtml` -> `ProductsController.Index()/Details()` -> `ShowProductList()/ShowProductDetails()` -> `GetProductList()/GetProductDetails()` -> `AppDbContext.Products`, `AppDbContext.Categories`
 
 ### UC-11 Update Product
 
-- `Boundary UI`: `Views/Products/Edit.cshtml`
-- `Controller`: `ProductsController.Edit()`
-- `Coordinator`: `PrepareUpdateProduct()`, `UpdateProduct()`
-- `Service`: `PrepareUpdateProduct()`, `UpdateProduct()`
+- `Views/Products/Edit.cshtml` -> `ProductsController.Edit()` -> `PrepareUpdateProduct()/UpdateProduct()` -> `PrepareUpdateProduct()/UpdateProduct()` -> `AppDbContext.Products`, `AppDbContext.Categories`
 
 ### UC-12 Deactivate Product
 
-- `Boundary UI`: `Views/Products/Index.cshtml`
-- `Controller`: `ProductsController.Deactivate()`
-- `Coordinator`: `DeactivateProduct()`
-- `Service`: `DeactivateProduct()`
+- `Views/Products/Index.cshtml` -> `ProductsController.Deactivate()` -> `DeactivateProduct()` -> `DeactivateProduct()` -> `AppDbContext.Products`
 
 ## Category Management
 
 ### UC-13 Create Category
 
-- `Boundary UI`: `Views/Categories/Create.cshtml`
-- `Controller`: `CategoriesController.Create()`
-- `Coordinator`: `PrepareCreateCategory()`, `CreateCategory()`
-- `Service`: `PrepareCreateCategory()`, `CreateCategory()`
+- `Views/Categories/Create.cshtml` -> `CategoriesController.Create()` -> `PrepareCreateCategory()/CreateCategory()` -> `PrepareCreateCategory()/CreateCategory()` -> `AppDbContext.Categories`
 
 ### UC-14 View Category
 
-- `Boundary UI`: `Views/Categories/Index.cshtml`, `Views/Categories/Details.cshtml`
-- `Controller`: `CategoriesController.Index()`, `CategoriesController.Details()`
-- `Coordinator`: `ShowCategoryList()`, `ShowCategoryDetails()`
-- `Service`: `GetCategoryList()`, `GetCategoryDetails()`
+- `Views/Categories/Index.cshtml`, `Views/Categories/Details.cshtml` -> `CategoriesController.Index()/Details()` -> `ShowCategoryList()/ShowCategoryDetails()` -> `GetCategoryList()/GetCategoryDetails()` -> `AppDbContext.Categories`, `AppDbContext.Products`
 
 ### UC-15 Update Category
 
-- `Boundary UI`: `Views/Categories/Edit.cshtml`
-- `Controller`: `CategoriesController.Edit()`
-- `Coordinator`: `PrepareUpdateCategory()`, `UpdateCategory()`
-- `Service`: `PrepareUpdateCategory()`, `UpdateCategory()`
+- `Views/Categories/Edit.cshtml` -> `CategoriesController.Edit()` -> `PrepareUpdateCategory()/UpdateCategory()` -> `PrepareUpdateCategory()/UpdateCategory()` -> `AppDbContext.Categories`, `AppDbContext.Products`
 
 ### UC-16 Deactivate Category
 
-- `Boundary UI`: `Views/Categories/Index.cshtml`
-- `Controller`: `CategoriesController.Deactivate()`
-- `Coordinator`: `DeactivateCategory()`
-- `Service`: `DeactivateCategory()`
+- `Views/Categories/Index.cshtml` -> `CategoriesController.Deactivate()` -> `DeactivateCategory()` -> `DeactivateCategory()` -> `AppDbContext.Categories`, `AppDbContext.Products`
 
 ## Transfer Note Management
 
 ### UC-41 Create Transfer Note
 
-- `Boundary UI`: `Views/TransferNotes/Create.cshtml`
-- `Controller`: `TransferNotesController.Create()`
-- `Coordinator`: `InitializeTransferDraft()`, `CreateTransferNote()`
-- `Service`: `TransferService.CreateTransferNote()`
-- `Supporting Service`: `LocationService`, `ProductService`, `InventoryQueryService`, `ValidationService`
+- `Views/TransferNotes/Create.cshtml` -> `TransferNotesController.Create()` -> `InitializeTransferDraft()/CreateTransferNote()` -> `TransferService.CreateTransferNote()` -> `LocationService`, `ProductService`, `InventoryQueryService`, `ValidationService`, `AppDbContext.TransferNotes`, `AppDbContext.TransferNoteItems`
 
 ### UC-42 View Transfer Note
 
-- `Boundary UI`: `Views/TransferNotes/Index.cshtml`, `Views/TransferNotes/Details.cshtml`
-- `Controller`: `TransferNotesController.Index()`, `TransferNotesController.Details()`
-- `Coordinator`: `ShowTransferNoteList()`, `ShowTransferNoteDetails()`
-- `Service`: `TransferService.GetTransferNotes()`, `TransferService.GetTransferNote()`
-- `Supporting Service`: `FilterService`
+- `Views/TransferNotes/Index.cshtml`, `Views/TransferNotes/Details.cshtml` -> `TransferNotesController.Index()/Details()` -> `ShowTransferNoteList()/ShowTransferNoteDetails()` -> `TransferService.GetTransferNotes()/GetTransferNote()` -> `FilterService`, `AppDbContext.TransferNotes`, `AppDbContext.TransferNoteItems`
 
 ### UC-43 Update Transfer Note
 
-- `Boundary UI`: `Views/TransferNotes/Edit.cshtml`
-- `Controller`: `TransferNotesController.Edit()`
-- `Coordinator`: `PrepareTransferUpdate()`, `UpdateTransferNote()`
-- `Service`: `TransferService.UpdateTransferNote()`
-- `Supporting Service`: `ValidationService`, `InventoryQueryService`
+- `Views/TransferNotes/Edit.cshtml` -> `TransferNotesController.Edit()` -> `PrepareTransferUpdate()/UpdateTransferNote()` -> `TransferService.UpdateTransferNote()` -> `ValidationService`, `InventoryQueryService`, `AppDbContext.TransferNotes`, `AppDbContext.TransferNoteItems`
 
 ### UC-44 Approve Transfer Note
 
-- `Boundary UI`: `Views/TransferNotes/Index.cshtml`, `Views/TransferNotes/Details.cshtml`
-- `Controller`: `TransferNotesController.Approve()`, `TransferNotesController.Reject()`
-- `Coordinator`: `ApproveTransferNote()`, `RejectTransferNote()`
-- `Service`: `TransferService.ReviewTransferNote()`
-- `Supporting Service`: `InventoryService`
+- `Views/TransferNotes/Index.cshtml`, `Views/TransferNotes/Details.cshtml` -> `TransferNotesController.Approve()/Reject()` -> `ApproveTransferNote()/RejectTransferNote()` -> `TransferService.ReviewTransferNote()` -> `InventoryService`, `AppDbContext.TransferNotes`
 
 ### UC-45 Confirm Transfer Out
 
-- `Boundary UI`: `Views/TransferNotes/Details.cshtml`
-- `Controller`: `TransferNotesController.ConfirmTransferOut()`
-- `Coordinator`: `ConfirmTransferOut()`
-- `Service`: `TransferService.ConfirmTransferOut()`
-- `Supporting Service`: `InventoryService`, `AuditLogService`
+- `Views/TransferNotes/Details.cshtml` -> `TransferNotesController.ConfirmTransferOut()` -> `ConfirmTransferOut()` -> `TransferService.ConfirmTransferOut()` -> `InventoryService`, `AuditLogService`, `AppDbContext.TransferNotes`
 
 ## Communication Diagram Alignment
 

@@ -9,11 +9,11 @@ Demo website `ASP.NET Core MVC` cho SupperChain ERP, bam theo use case, communic
 
 ## Kien truc tong quan
 
-Luong chinh trong code:
+Luong xu ly chinh trong he thong:
 
 `Boundary UI -> Controller -> Coordinator -> Service -> AppDbContext -> Notification`
 
-Map participant:
+Map participant trong code:
 
 - `Boundary UI`: Razor Views trong `Views/*`
 - `Boundary Controller`: MVC Controllers trong `Controllers/*`
@@ -39,23 +39,23 @@ Map participant:
 ### 3. Coordinator / Application Service
 
 - Ap dung qua `UserManagementCoordinator`, `RoleManagementCoordinator`, `CategoryManagementCoordinator`, `ProductManagementCoordinator`, `TransferCoordinator`
-- Ly do dung: coordinator dung de dieu phoi luong xu ly cua use case va map sat voi communication diagram trong doc
+- Ly do dung: coordinator dieu phoi luong xu ly cua use case va map sat voi communication diagram trong doc
 
 ### 4. Dependency Injection
 
 - Ap dung trong `Program.cs` thong qua `AddScoped`, `AddSingleton`
-- Ly do dung: giam coupling giua cac thanh phan, de thay the implementation, va dung voi best practice cua ASP.NET Core
+- Ly do dung: giam coupling, de thay the implementation, va dung voi best practice cua ASP.NET Core
 
 ### 5. ViewModel Pattern
 
 - Ap dung qua cac lop trong `ViewModels/*`
 - Vi du: `ViewModels/Users/UserFormViewModel.cs`, `ViewModels/TransferNotes/*`
-- Ly do dung: du lieu dua ra UI duoc dong goi rieng, tranh dua truc tiep entity database len view, an toan va de kiem soat field
+- Ly do dung: du lieu UI duoc dong goi rieng, tranh dua truc tiep entity database len view
 
 ### 6. Facade-like Orchestration
 
 - Ap dung ro nhat trong `TransferCoordinator`
-- Ly do dung: module transfer note co nhieu participant nhu `FilterService`, `ValidationService`, `InventoryService`, `TransferService`, `AuditLogService`; can mot diem dieu phoi trung tam de giu flow ro rang
+- Ly do dung: module transfer note co nhieu participant; can mot diem dieu phoi trung tam de giu flow ro rang
 
 ### 7. Strategy theo trach nhiem nho
 
@@ -70,7 +70,7 @@ Map participant:
 ### 9. Notification Pattern
 
 - Ap dung qua `NotificationService` + `TempData`
-- Ly do dung: hien thi message sau redirect cho cac thao tac create, update, approve, confirm out; phu hop voi flow web MVC
+- Ly do dung: hien thi message sau redirect cho create, update, approve, confirm out; phu hop voi flow web MVC
 
 ## Transfer Note Flow
 
@@ -86,10 +86,29 @@ Flow chinh:
 
 `TransferInteraction -> TransferNotesController -> TransferCoordinator -> FilterService / ValidationService / LocationService / ProductService / InventoryQueryService / InventoryService / TransferService / AuditLogService`
 
+## Cau truc thu muc
+
+```text
+Code/
+|-- README.md
+|-- docs/
+|   `-- USECASE_MAPPING.md
+`-- SupperChainErpDemo.Web/
+    |-- Controllers/
+    |-- Data/
+    |-- Models/
+    |-- Services/
+    |-- ViewModels/
+    |-- Views/
+    |-- wwwroot/
+    `-- Program.cs
+```
+
 ## Chay local
 
 ```powershell
 cd d:\Desktop\SWD392\Code\SupperChainErpDemo.Web
+dotnet build
 dotnet run --urls http://127.0.0.1:5055
 ```
 
