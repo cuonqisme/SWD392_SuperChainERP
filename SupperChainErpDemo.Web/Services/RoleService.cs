@@ -130,7 +130,7 @@ public class RoleService : IRoleService
         return ServiceResult.Success($"Role {role.RoleName} was updated successfully.");
     }
 
-    public ServiceResult DeactivateRole(string id)
+    public ServiceResult UpdateRoleStatus(string id, RecordStatus status)
     {
         var role = GetRoleDetails(id);
         if (role is null)
@@ -138,15 +138,16 @@ public class RoleService : IRoleService
             return ServiceResult.Failure("The selected role could not be found.");
         }
 
-        if (_dbContext.Users.Any(user => user.RoleId == role.RoleId && user.Status == RecordStatus.Active))
+        if (status == RecordStatus.Inactive &&
+            _dbContext.Users.Any(user => user.RoleId == role.RoleId && user.Status == RecordStatus.Active))
         {
             return ServiceResult.Failure("This role is still assigned to active users. Reassign or deactivate those users first.");
         }
 
-        role.Status = RecordStatus.Inactive;
+        role.Status = status;
         role.UpdatedDate = DateTime.UtcNow;
         _dbContext.SaveChanges();
-        return ServiceResult.Success($"Role {role.RoleName} was deactivated successfully.");
+        return ServiceResult.Success($"Role {role.RoleName} status changed to {status}.");
     }
 
     private string? Validate(RoleFormViewModel model, string? currentId = null)

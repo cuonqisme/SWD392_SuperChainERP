@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.Services;
 using SupperChainErpDemo.Web.ViewModels.Products;
 
@@ -94,9 +95,9 @@ public class ProductsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Deactivate(string id)
+    public IActionResult ChangeStatus(string id, RecordStatus status)
     {
-        var result = _productManagementCoordinator.DeactivateProduct(id);
+        var result = _productManagementCoordinator.UpdateProductStatus(id, status);
         if (!result.Succeeded)
         {
             _notificationService.Error("Product status blocked", result.Message);

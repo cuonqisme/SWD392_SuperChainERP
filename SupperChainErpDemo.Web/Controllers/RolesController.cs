@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.Services;
 using SupperChainErpDemo.Web.ViewModels.Roles;
 
@@ -92,9 +93,9 @@ public class RolesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Deactivate(string id)
+    public IActionResult ChangeStatus(string id, RecordStatus status)
     {
-        var result = _roleManagementCoordinator.DeactivateRole(id);
+        var result = _roleManagementCoordinator.UpdateRoleStatus(id, status);
         if (!result.Succeeded)
         {
             _notificationService.Error("Role status blocked", result.Message);

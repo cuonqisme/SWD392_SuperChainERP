@@ -29,6 +29,6 @@ public class RoleManagementCoordinator : IRoleManagementCoordinator
     public ServiceResult UpdateRole(string id, RoleFormViewModel model) =>
         _roleService.UpdateRole(id, model);
 
-    public ServiceResult DeactivateRole(string id) =>
-        _roleService.DeactivateRole(id);
+    public ServiceResult UpdateRoleStatus(string id, Models.RecordStatus status) =>
+        _roleService.UpdateRoleStatus(id, status);
 }

@@ -125,7 +125,7 @@ public class CategoryService : ICategoryService
         return ServiceResult.Success($"Category {category.CategoryName} was updated successfully.");
     }
 
-    public ServiceResult DeactivateCategory(string id)
+    public ServiceResult UpdateCategoryStatus(string id, RecordStatus status)
     {
         var category = GetById(id);
         if (category is null)
@@ -133,15 +133,16 @@ public class CategoryService : ICategoryService
             return ServiceResult.Failure("The selected category could not be found.");
         }
 
-        if (_dbContext.Products.Any(product => product.CategoryId == category.CategoryId && product.Status == RecordStatus.Active))
+        if (status == RecordStatus.Inactive &&
+            _dbContext.Products.Any(product => product.CategoryId == category.CategoryId && product.Status == RecordStatus.Active))
         {
             return ServiceResult.Failure("Deactivate or move active products before deactivating this category.");
         }
 
-        category.Status = RecordStatus.Inactive;
+        category.Status = status;
         category.UpdatedDate = DateTime.UtcNow;
         _dbContext.SaveChanges();
-        return ServiceResult.Success($"Category {category.CategoryName} was deactivated successfully.");
+        return ServiceResult.Success($"Category {category.CategoryName} status changed to {status}.");
     }
 
     public static string BuildSku(string prefix, string productId) => $"{prefix}-{productId}";

@@ -28,35 +28,3 @@
         </article>
     }
 </section>
-
-<section class="content-grid">
-    <article class="content-panel">
-        <div class="section-heading">
-            <div>
-                <p class="eyebrow">Execution flow</p>
-                <h3>Use case pipeline</h3>
-            </div>
-        </div>
-        <ol class="flow-list">
-            @foreach (var flow in Model.UseCaseFlows)
-            {
-                <li>@flow</li>
-            }
-        </ol>
-    </article>
-
-    <article class="content-panel">
-        <div class="section-heading">
-            <div>
-                <p class="eyebrow">Recent updates</p>
-                <h3>Demo data highlights</h3>
-            </div>
-        </div>
-        <ul class="plain-list">
-            @foreach (var note in Model.RecentHighlights)
-            {
-                <li>@note</li>
-            }
-        </ul>
-    </article>
-</section>

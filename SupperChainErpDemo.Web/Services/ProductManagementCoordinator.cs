@@ -29,6 +29,6 @@ public class ProductManagementCoordinator : IProductManagementCoordinator
     public ServiceResult UpdateProduct(string id, ProductFormViewModel model) =>
         _productService.UpdateProduct(id, model);
 
-    public ServiceResult DeactivateProduct(string id) =>
-        _productService.DeactivateProduct(id);
+    public ServiceResult UpdateProductStatus(string id, Models.RecordStatus status) =>
+        _productService.UpdateProductStatus(id, status);
 }

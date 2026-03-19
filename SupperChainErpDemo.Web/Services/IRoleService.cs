@@ -17,5 +17,5 @@ public interface IRoleService
 
     ServiceResult UpdateRole(string id, RoleFormViewModel model);
 
-    ServiceResult DeactivateRole(string id);
+    ServiceResult UpdateRoleStatus(string id, RecordStatus status);
 }

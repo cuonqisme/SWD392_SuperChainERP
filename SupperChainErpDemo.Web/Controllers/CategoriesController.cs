@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SupperChainErpDemo.Web.Models;
 using SupperChainErpDemo.Web.Services;
 using SupperChainErpDemo.Web.ViewModels.Categories;
 
@@ -90,9 +91,9 @@ public class CategoriesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Deactivate(string id)
+    public IActionResult ChangeStatus(string id, RecordStatus status)
     {
-        var result = _categoryManagementCoordinator.DeactivateCategory(id);
+        var result = _categoryManagementCoordinator.UpdateCategoryStatus(id, status);
         if (!result.Succeeded)
         {
             _notificationService.Error("Category status blocked", result.Message);

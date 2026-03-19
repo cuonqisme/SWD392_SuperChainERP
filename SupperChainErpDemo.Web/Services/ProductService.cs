@@ -168,7 +168,7 @@ public class ProductService : IProductService
         return ServiceResult.Success($"Product {product.ProductName} was updated successfully.");
     }
 
-    public ServiceResult DeactivateProduct(string id)
+    public ServiceResult UpdateProductStatus(string id, RecordStatus status)
     {
         var product = GetById(id);
         if (product is null)
@@ -176,10 +176,19 @@ public class ProductService : IProductService
             return ServiceResult.Failure("The selected product could not be found.");
         }
 
-        product.Status = RecordStatus.Inactive;
+        if (status == RecordStatus.Active)
+        {
+            var category = _dbContext.Categories.FirstOrDefault(item => item.CategoryId == product.CategoryId);
+            if (category?.Status != RecordStatus.Active)
+            {
+                return ServiceResult.Failure("Products can only be activated when their category is active.");
+            }
+        }
+
+        product.Status = status;
         product.UpdatedDate = DateTime.UtcNow;
         _dbContext.SaveChanges();
-        return ServiceResult.Success($"Product {product.ProductName} was deactivated successfully.");
+        return ServiceResult.Success($"Product {product.ProductName} status changed to {status}.");
     }
 
     private Category? Validate(ProductFormViewModel model, string? currentId = null)

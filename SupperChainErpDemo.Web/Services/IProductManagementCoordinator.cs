@@ -16,5 +16,5 @@ public interface IProductManagementCoordinator
 
     ServiceResult UpdateProduct(string id, ProductFormViewModel model);
 
-    ServiceResult DeactivateProduct(string id);
+    ServiceResult UpdateProductStatus(string id, Models.RecordStatus status);
 }

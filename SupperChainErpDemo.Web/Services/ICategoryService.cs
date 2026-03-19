@@ -17,5 +17,5 @@ public interface ICategoryService
 
     ServiceResult UpdateCategory(string id, CategoryFormViewModel model);
 
-    ServiceResult DeactivateCategory(string id);
+    ServiceResult UpdateCategoryStatus(string id, RecordStatus status);
 }

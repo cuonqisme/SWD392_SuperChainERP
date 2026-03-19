@@ -29,6 +29,6 @@ public class CategoryManagementCoordinator : ICategoryManagementCoordinator
     public ServiceResult UpdateCategory(string id, CategoryFormViewModel model) =>
         _categoryService.UpdateCategory(id, model);
 
-    public ServiceResult DeactivateCategory(string id) =>
-        _categoryService.DeactivateCategory(id);
+    public ServiceResult UpdateCategoryStatus(string id, Models.RecordStatus status) =>
+        _categoryService.UpdateCategoryStatus(id, status);
 }
